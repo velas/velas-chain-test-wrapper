@@ -15,5 +15,26 @@
   "bugs": {
     "url": "https://github.com/velas/blockchain-tests/issues"
   },
-  "homepage": "https://github.com/velas/blockchain-tests#readme"
+  "homepage": "https://github.com/velas/blockchain-tests#readme",
+  "devDependencies": {
+    "@types/bs58": "^4.0.1",
+    "@types/chai": "^4.2.18",
+    "@types/mocha": "^8.2.2",
+    "@types/node": "^15.12.1",
+    "mocha": "^8.4.0",
+    "typescript": "^4.3.2"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.18.0",
+    "@types/mz": "^2.7.3",
+    "axios": "^0.21.1",
+    "bs58": "^4.0.1",
+    "chai": "^4.3.4",
+    "mochawesome": "^6.2.2",
+    "mz": "^2.7.0",
+    "tracer": "^1.1.4",
+    "ts-mocha": "^8.0.0",
+    "ts-node": "^10.0.0",
+    "yaml": "^1.10.2"
+  }
 }
