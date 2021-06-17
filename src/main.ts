@@ -1,9 +1,14 @@
 import {
+  Account,
   Connection,
-  PublicKey
+  PublicKey,
+  sendAndConfirmRawTransaction,
+  SystemProgram,
+  Transaction,
 } from '@velas/solana-web3';
-// import base58 from 'bs58';
+import nacl from 'tweetnacl';
 import { log } from '../logger';
+
 
 let connection: Connection;
 
@@ -15,12 +20,18 @@ async function establishConnection(): Promise<void> {
 }
 
 async function getBalance() {
-  const publicKey = new PublicKey('EcC91Vj9AB8PqryPjHmS6w55M6fHrRA7sRzzwbYgiCoX');
+  const publicKey = new PublicKey('9kMFdW1VENdVpMyG9NNadNTzwXghknj3iU7CUwYFP1GC');
 
   if (!connection) await establishConnection();
 
   const lamports = await connection.getBalance(publicKey);
   log.info(`Balance: ${lamports / 10 ** 9} VLX`);
+}
+
+async function getEpochInfo() {
+  await establishConnection();
+  const epochInfo = await connection.getEpochInfo();
+  log.info(epochInfo);
 }
 
 async function getTransaction() {
@@ -33,8 +44,52 @@ async function getTransaction() {
   log.info(transaction?.meta?.logMessages?.join('').includes('Succeed'));
 }
 
+async function transfer() {
+  await establishConnection();
+
+  const senderSeed = 'delay swift sick mixture vibrant element review arm snap true broccoli industry expect thought panel curve inhale rally dish close trade damp skin below';
+
+  const bufferedSeed = Buffer.from(senderSeed);
+  const keyPair = nacl.sign.keyPair.fromSeed(bufferedSeed.slice(0, 32));
+  // const pubKey = bs58.encode(keyPair.publicKey);
+  const secretKey = keyPair.secretKey;
+  const pubKey = keyPair.publicKey;
+  console.log(pubKey);
+
+  const payerAccount = new Account(secretKey);
+
+
+  const transactionInsctruction = SystemProgram.transfer({
+    fromPubkey: new PublicKey(pubKey),
+    // toPubkey: new PublicKey('7LG1MMms32y6z7a9DqAPEt7uxR3ZMLZiMyrkuMRd7aX8'),
+    toPubkey: new PublicKey('EcC91Vj9AB8PqryPjHmS6w55M6fHrRA7sRzzwbYgiCoX'),
+    lamports: 10000000,
+  });
+
+  const { blockhash: recentBlockhash } = await connection.getRecentBlockhash();
+  console.log(payerAccount.publicKey.toBase58())
+  const tx = new Transaction({ recentBlockhash, feePayer: new PublicKey('9kMFdW1VENdVpMyG9NNadNTzwXghknj3iU7CUwYFP1GC') }).add(transactionInsctruction);
+  tx.sign(payerAccount);
+
+  console.dir(tx, { depth: null })
+
+  const transactionId = await sendAndConfirmRawTransaction(
+    connection,
+    tx.serialize(),
+    {
+      commitment: 'single',
+      skipPreflight: true,
+    }
+  );
+
+  console.log('- - - - - - - - - - - - -');
+  console.log('Transaction ID:', transactionId);
+  console.log('- - - - - - - - - - - - -');
+}
+
 (async () => {
   // await getBalance();
-  await getTransaction();
-
+  // await getTransaction();
+  // await transfer();
+  await getEpochInfo();
 })();
