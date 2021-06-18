@@ -26,7 +26,7 @@ class Payer {
   }
 }
 
-export class VelasWeb3 {
+export class VelasNative {
   connection: Connection | undefined;
 
   private async establishConnection(): Promise<void> {
@@ -88,6 +88,7 @@ export class VelasWeb3 {
 
     const epochInfo = await this.connection.getEpochInfo();
     log.info(epochInfo);
+    return epochInfo;
   }
 
   async getSlot() {
@@ -98,6 +99,7 @@ export class VelasWeb3 {
 
     const slot = await this.connection.getSlot();
     log.info(slot);
+    return slot;
   }
 
   async getSupply() {
@@ -157,16 +159,18 @@ export class VelasWeb3 {
 
 }
 
-const velasWeb3 = new VelasWeb3();
+// const velasWeb3 = new VelasWeb3();
 
-(async () => {
-  // await velasWeb3.getBalance();
-  // await velasWeb3.getTransaction('6pYCFnhaMd8eZAQWT5aM1GaY75yUq6bVE7houhU9jnTKufBVb3uomzkEY2t7jRFSACn8D94rG3XgP2pos9FZXo7');
-  // await transfer();
-  // await velasWeb3.getEpochInfo();
-  // await velasWeb3.getSlot();
-  // await velasWeb3.getConfirmedBlock(14621562);
-  // await getSupply();
-  // await getAccountInfo(new PublicKey('9kMFdW1VENdVpMyG9NNadNTzwXghknj3iU7CUwYFP1GC'));
-  await velasWeb3.transfer({ payerSeed: 'delay swift sick mixture vibrant element review arm snap true broccoli industry expect thought panel curve inhale rally dish close trade damp skin below', toAddress: 'EcC91Vj9AB8PqryPjHmS6w55M6fHrRA7sRzzwbYgiCoX' });
-})();
+// (async () => {
+//   // await velasWeb3.getBalance();
+//   // await velasWeb3.getTransaction('6pYCFnhaMd8eZAQWT5aM1GaY75yUq6bVE7houhU9jnTKufBVb3uomzkEY2t7jRFSACn8D94rG3XgP2pos9FZXo7');
+//   // await transfer();
+//   // await velasWeb3.getEpochInfo();
+//   await velasWeb3.getEpochInfo();
+//   const slot = await velasWeb3.getSlot();
+//   // log.info(slot);
+//   await velasWeb3.getConfirmedBlock(14641594);
+//   // await getSupply();
+//   // await getAccountInfo(new PublicKey('9kMFdW1VENdVpMyG9NNadNTzwXghknj3iU7CUwYFP1GC'));
+//   // await velasWeb3.transfer({ payerSeed: 'delay swift sick mixture vibrant element review arm snap true broccoli industry expect thought panel curve inhale rally dish close trade damp skin below', toAddress: 'EcC91Vj9AB8PqryPjHmS6w55M6fHrRA7sRzzwbYgiCoX' });
+// })();
