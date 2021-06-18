@@ -4,92 +4,169 @@ import {
   PublicKey,
   sendAndConfirmRawTransaction,
   SystemProgram,
-  Transaction,
+  Transaction
 } from '@velas/solana-web3';
 import nacl from 'tweetnacl';
 import { log } from '../logger';
 
+class Payer {
+  account;
+  bufferedSeed;
+  keyPair;
+  pubKey;
+  secretKey;
 
-let connection: Connection;
-
-async function establishConnection(): Promise<void> {
-  const rpcUrl = 'https://api.testnet.velas.com';
-  connection = new Connection(rpcUrl, 'confirmed');
-  const version = await connection.getVersion();
-  console.log('Connection to cluster established:', rpcUrl, version);
+  constructor(public seed: string) {
+    this.bufferedSeed = Buffer.from(seed);
+    this.keyPair = nacl.sign.keyPair.fromSeed(this.bufferedSeed.slice(0, 32));
+    this.secretKey = this.keyPair.secretKey;
+    this.pubKey = this.keyPair.publicKey;
+    // const pubKey = bs58.encode(keyPair.publicKey);
+    this.account = new Account(this.secretKey);
+  }
 }
 
-async function getBalance() {
-  const publicKey = new PublicKey('9kMFdW1VENdVpMyG9NNadNTzwXghknj3iU7CUwYFP1GC');
+export class VelasWeb3 {
+  connection: Connection | undefined;
 
-  if (!connection) await establishConnection();
+  private async establishConnection(): Promise<void> {
+    const rpcUrl = 'https://api.testnet.velas.com';
+    this.connection = new Connection(rpcUrl, 'confirmed');
+    const version = await this.connection.getVersion();
+    log.info('Connection to cluster established:', rpcUrl, version);
+  }
 
-  const lamports = await connection.getBalance(publicKey);
-  log.info(`Balance: ${lamports / 10 ** 9} VLX`);
-}
-
-async function getEpochInfo() {
-  await establishConnection();
-  const epochInfo = await connection.getEpochInfo();
-  log.info(epochInfo);
-}
-
-async function getTransaction() {
-  await establishConnection();
-  const transaction = await connection.getConfirmedTransaction('6pYCFnhaMd8eZAQWT5aM1GaY75yUq6bVE7houhU9jnTKufBVb3uomzkEY2t7jRFSACn8D94rG3XgP2pos9FZXo7');
-  // log.info(`Transaction:\n${JSON.stringify(transaction, null, 2)}`);
-  // const buffer = transaction?.transaction.signatures[0].signature?.buffer as ArrayBufferLike;
-  // log.warn(Buffer.from(buffer).toString());
-  log.info(transaction?.meta?.err === null);
-  log.info(transaction?.meta?.logMessages?.join('').includes('Succeed'));
-}
-
-async function transfer() {
-  await establishConnection();
-
-  const senderSeed = 'delay swift sick mixture vibrant element review arm snap true broccoli industry expect thought panel curve inhale rally dish close trade damp skin below';
-
-  const bufferedSeed = Buffer.from(senderSeed);
-  const keyPair = nacl.sign.keyPair.fromSeed(bufferedSeed.slice(0, 32));
-  // const pubKey = bs58.encode(keyPair.publicKey);
-  const secretKey = keyPair.secretKey;
-  const pubKey = keyPair.publicKey;
-  console.log(pubKey);
-
-  const payerAccount = new Account(secretKey);
-
-
-  const transactionInsctruction = SystemProgram.transfer({
-    fromPubkey: new PublicKey(pubKey),
-    // toPubkey: new PublicKey('7LG1MMms32y6z7a9DqAPEt7uxR3ZMLZiMyrkuMRd7aX8'),
-    toPubkey: new PublicKey('EcC91Vj9AB8PqryPjHmS6w55M6fHrRA7sRzzwbYgiCoX'),
-    lamports: 10000000,
-  });
-
-  const { blockhash: recentBlockhash } = await connection.getRecentBlockhash();
-  console.log(payerAccount.publicKey.toBase58())
-  const tx = new Transaction({ recentBlockhash, feePayer: new PublicKey('9kMFdW1VENdVpMyG9NNadNTzwXghknj3iU7CUwYFP1GC') }).add(transactionInsctruction);
-  tx.sign(payerAccount);
-
-  console.dir(tx, { depth: null })
-
-  const transactionId = await sendAndConfirmRawTransaction(
-    connection,
-    tx.serialize(),
-    {
-      commitment: 'single',
-      skipPreflight: true,
+  async getBalance(account: string | PublicKey) {
+    if (!this.connection) {
+      await this.establishConnection();
+      if (!this.connection) throw new Error(`Cannot establish connection`);
     }
-  );
 
-  console.log('- - - - - - - - - - - - -');
-  console.log('Transaction ID:', transactionId);
-  console.log('- - - - - - - - - - - - -');
+    let publicKey = typeof account === 'string' ? new PublicKey(account) : account;
+    const lamports = await this.connection.getBalance(publicKey);
+    log.info(`Balance: ${lamports / 10 ** 9} VLX`);
+  }
+
+  async getConfirmedBlock(slot: number) {
+    if (!this.connection) {
+      await this.establishConnection();
+      if (!this.connection) throw new Error(`Cannot establish connection`);
+    }
+
+    const block = await this.connection.getConfirmedBlock(slot);
+    log.info(block);
+  }
+
+  async getNonce(nonceAccount: string | PublicKey) {
+    if (!this.connection) {
+      await this.establishConnection();
+      if (!this.connection) throw new Error(`Cannot establish connection`);
+    }
+
+    let publicKey = typeof nonceAccount === 'string' ? new PublicKey(nonceAccount) : nonceAccount;
+    const nonceAcc = await this.connection.getNonce(publicKey);
+    log.info(nonceAcc);
+    return nonceAcc;
+  }
+
+  async getAccountInfo(publicKey: PublicKey) {
+    if (!this.connection) {
+      await this.establishConnection();
+      if (!this.connection) throw new Error(`Cannot establish connection`);
+    }
+
+    const accInfo = await this.connection.getAccountInfo(publicKey);
+    log.info(accInfo);
+    return accInfo;
+  }
+
+  async getEpochInfo() {
+    if (!this.connection) {
+      await this.establishConnection();
+      if (!this.connection) throw new Error(`Cannot establish connection`);
+    }
+
+    const epochInfo = await this.connection.getEpochInfo();
+    log.info(epochInfo);
+  }
+
+  async getSlot() {
+    if (!this.connection) {
+      await this.establishConnection();
+      if (!this.connection) throw new Error(`Cannot establish connection`);
+    }
+
+    const slot = await this.connection.getSlot();
+    log.info(slot);
+  }
+
+  async getSupply() {
+    if (!this.connection) {
+      await this.establishConnection();
+      if (!this.connection) throw new Error(`Cannot establish connection`);
+    }
+
+    const supplyInfo = await this.connection.getSupply();
+    log.info(`Total supply: ${(supplyInfo.value.total / 10 ** 9).toFixed(0)} VLX`);
+  }
+
+  async getTransaction(signature: string) {
+    if (!this.connection) {
+      await this.establishConnection();
+      if (!this.connection) throw new Error(`Cannot establish connection`);
+    }
+
+    const transaction = await this.connection.getConfirmedTransaction(signature);
+    if (transaction?.meta?.err) log.warn(`Transaction ${signature} has error\n${transaction?.meta?.err}`)
+    // log.info(transaction?.meta?.logMessages?.join('').includes('Succeed'));
+  }
+
+  async transfer(params: { payerSeed: string, toAddress: string }) {
+    if (!this.connection) {
+      await this.establishConnection();
+      if (!this.connection) throw new Error(`Cannot establish connection`);
+    }
+
+    const payer = new Payer(params.payerSeed);
+    const recepientPubKey = new PublicKey(params.toAddress)
+
+    const transactionInsctruction = SystemProgram.transfer({
+      fromPubkey: new PublicKey(payer.pubKey),
+      toPubkey: recepientPubKey,
+      lamports: 10000000,
+    });
+
+    const { blockhash: recentBlockhash } = await this.connection.getRecentBlockhash();
+    console.log(payer.account.publicKey.toBase58())
+    const tx = new Transaction({ recentBlockhash, feePayer: new PublicKey(payer.pubKey) }).add(transactionInsctruction);
+    tx.sign(payer.account);
+
+    const transactionId = await sendAndConfirmRawTransaction(
+      this.connection,
+      tx.serialize(),
+      {
+        commitment: 'single',
+        skipPreflight: true,
+      }
+    );
+
+    console.log('- - - - - - - - - - - - -');
+    console.log('Transaction ID:', transactionId);
+    console.log('- - - - - - - - - - - - -');
+  }
+
 }
+
+const velasWeb3 = new VelasWeb3();
 
 (async () => {
-  // await getBalance();
-  // await getTransaction();
+  // await velasWeb3.getBalance();
+  // await velasWeb3.getTransaction('6pYCFnhaMd8eZAQWT5aM1GaY75yUq6bVE7houhU9jnTKufBVb3uomzkEY2t7jRFSACn8D94rG3XgP2pos9FZXo7');
   // await transfer();
-  await getEpochInfo();
+  // await velasWeb3.getEpochInfo();
+  // await velasWeb3.getSlot();
+  // await velasWeb3.getConfirmedBlock(14621562);
+  // await getSupply();
+  // await getAccountInfo(new PublicKey('9kMFdW1VENdVpMyG9NNadNTzwXghknj3iU7CUwYFP1GC'));
+  await velasWeb3.transfer({ payerSeed: 'delay swift sick mixture vibrant element review arm snap true broccoli industry expect thought panel curve inhale rally dish close trade damp skin below', toAddress: 'EcC91Vj9AB8PqryPjHmS6w55M6fHrRA7sRzzwbYgiCoX' });
 })();
