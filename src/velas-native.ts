@@ -6,10 +6,13 @@ import {
   SystemProgram,
   Transaction
 } from '@velas/solana-web3';
+import bs58 from 'bs58';
 import nacl from 'tweetnacl';
 import { log } from '../logger';
+import { testData } from '../test-data';
+import { helpers } from './helpers';
 
-class Payer {
+class AccountObj {
   account;
   bufferedSeed;
   keyPair;
@@ -36,7 +39,7 @@ export class VelasNative {
     log.info('Connection to cluster established:', rpcUrl, version);
   }
 
-  async getBalance(account: string | PublicKey) {
+  async getBalance(account: string | PublicKey): Promise<{ lamports: number, VLX: number }> {
     if (!this.connection) {
       await this.establishConnection();
       if (!this.connection) throw new Error(`Cannot establish connection`);
@@ -44,7 +47,9 @@ export class VelasNative {
 
     let publicKey = typeof account === 'string' ? new PublicKey(account) : account;
     const lamports = await this.connection.getBalance(publicKey);
-    log.info(`Balance: ${lamports / 10 ** 9} VLX`);
+    const VLXAmount = lamports / 10 ** 9;
+    log.info(`Balance: ${VLXAmount} VLX`);
+    return { lamports, VLX: VLXAmount };
   }
 
   async getConfirmedBlock(slot: number) {
@@ -118,28 +123,47 @@ export class VelasNative {
       if (!this.connection) throw new Error(`Cannot establish connection`);
     }
 
-    const transaction = await this.connection.getConfirmedTransaction(signature);
-    if (transaction?.meta?.err) log.warn(`Transaction ${signature} has error\n${transaction?.meta?.err}`)
+    let transaction = await this.connection.getConfirmedTransaction(signature);
+
+    if (transaction?.meta?.err) log.warn(`Transaction ${signature} has error\n${transaction?.meta?.err}`);
+    if (!transaction) log.warn(`No confirmed transaction with signature ${signature}`);
     // log.info(transaction?.meta?.logMessages?.join('').includes('Succeed'));
+    return transaction;
   }
 
-  async transfer(params: { payerSeed: string, toAddress: string }) {
+  /***
+   * waitTime in seconds
+   */
+  async waitForConfirmedTransaction(signature: string, waitTime = 20) {
+    let transaction = await this.connection!.getConfirmedTransaction(signature);
+
+    while (!transaction && waitTime > 0) {
+      waitTime--;
+      await helpers.sleep(1);
+      transaction = await this.connection!.getConfirmedTransaction(signature);
+    }
+
+    if (transaction?.meta?.err) log.warn(`Transaction ${signature} has error\n${transaction?.meta?.err}`);
+    if (!transaction) log.warn(`No confirmed transaction with signature ${signature}`);
+    return transaction;
+  }
+
+  async transfer(params: { payerSeed: string, toAddress: string, lamports: number }): Promise<string> {
     if (!this.connection) {
       await this.establishConnection();
       if (!this.connection) throw new Error(`Cannot establish connection`);
     }
 
-    const payer = new Payer(params.payerSeed);
-    const recepientPubKey = new PublicKey(params.toAddress)
+    const payer = new AccountObj(params.payerSeed);
+    const recepientPubKey = new PublicKey(params.toAddress);
 
     const transactionInsctruction = SystemProgram.transfer({
       fromPubkey: new PublicKey(payer.pubKey),
       toPubkey: recepientPubKey,
-      lamports: 10000000,
+      lamports: params.lamports,
     });
 
     const { blockhash: recentBlockhash } = await this.connection.getRecentBlockhash();
-    console.log(payer.account.publicKey.toBase58())
     const tx = new Transaction({ recentBlockhash, feePayer: new PublicKey(payer.pubKey) }).add(transactionInsctruction);
     tx.sign(payer.account);
 
@@ -152,25 +176,31 @@ export class VelasNative {
       }
     );
 
-    console.log('- - - - - - - - - - - - -');
-    console.log('Transaction ID:', transactionId);
-    console.log('- - - - - - - - - - - - -');
+    log.info('Transaction ID:', transactionId);
+    return transactionId;
   }
-
 }
 
-// const velasWeb3 = new VelasWeb3();
+export const velasNative = new VelasNative();
 
-// (async () => {
-//   // await velasWeb3.getBalance();
-//   // await velasWeb3.getTransaction('6pYCFnhaMd8eZAQWT5aM1GaY75yUq6bVE7houhU9jnTKufBVb3uomzkEY2t7jRFSACn8D94rG3XgP2pos9FZXo7');
-//   // await transfer();
-//   // await velasWeb3.getEpochInfo();
-//   await velasWeb3.getEpochInfo();
-//   const slot = await velasWeb3.getSlot();
-//   // log.info(slot);
-//   await velasWeb3.getConfirmedBlock(14641594);
-//   // await getSupply();
-//   // await getAccountInfo(new PublicKey('9kMFdW1VENdVpMyG9NNadNTzwXghknj3iU7CUwYFP1GC'));
-//   // await velasWeb3.transfer({ payerSeed: 'delay swift sick mixture vibrant element review arm snap true broccoli industry expect thought panel curve inhale rally dish close trade damp skin below', toAddress: 'EcC91Vj9AB8PqryPjHmS6w55M6fHrRA7sRzzwbYgiCoX' });
-// })();
+(async () => {
+  // await velasWeb3.getTransaction('6pYCFnhaMd8eZAQWT5aM1GaY75yUq6bVE7houhU9jnTKufBVb3uomzkEY2t7jRFSACn8D94rG3XgP2pos9FZXo7');
+  // await transfer();
+  // await velasWeb3.getEpochInfo();
+  // await velasNative.getEpochInfo();
+  // const slot = await velasNative.getSlot();
+  // log.info(slot);
+  // await velasNative.getConfirmedBlock(14641594);
+  // await getSupply();
+  // await getAccountInfo(new PublicKey('9kMFdW1VENdVpMyG9NNadNTzwXghknj3iU7CUwYFP1GC'));
+  // await velasNative.getBalance('');
+  // await velasNative.getBalance('6hUNaeEwbpwEyQVgfTmZvMK1khqs18kq6sywDmRQgGyb');
+  // const transactionID = await velasNative.transfer({ payerSeed: testData.payer.seed, toAddress: '', lamports: 13000000000 });
+  // await velasNative.getBalance('6hUNaeEwbpwEyQVgfTmZvMK1khqs18kq6sywDmRQgGyb');
+  // console.log(await velasNative.waitForConfirmedTransaction(transactionID));
+  // await velasNative.getBalance('Hj6ibSJDYE5nyNynGQiktsL8fuGqZrpeXatLG61hh4Sq');
+  // log.error(await velasNative.connection?.getEpochSchedule());
+
+  // const newAcc = new AccountObj('delay swift sick mixture vibrant element review arm snap true broccoli industry expect thought panel curve inhale rally dish close trade damp skin below');
+  // console.log(bs58.encode(newAcc.pubKey));
+})();

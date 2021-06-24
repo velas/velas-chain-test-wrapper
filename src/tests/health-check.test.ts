@@ -1,17 +1,16 @@
 import { log } from '../../logger';
-import { VelasNative } from '../velas-native';
-
-const velasNative = new VelasNative();
+import { assert } from '../assert';
+import { velasNative } from '../velas-native';
 
 describe('Health check', function () {
-  this.timeout(300000);
+  // this.timeout(300000);
 
   it('Get epoch info', async function () {
     const epochInfo = await velasNative.getEpochInfo();
-    log.warn(epochInfo);
+    assert.isAbove(epochInfo.epoch, 48);
   });
 
-  it.only('No skipped blocks', async function () {
+  xit('No skipped blocks', async function () {
     const slot = await velasNative.getSlot();
     const lastConfirmedBlock = slot - 100;
     // blocks in epoch – 432000
@@ -20,4 +19,16 @@ describe('Health check', function () {
       await velasNative.getConfirmedBlock(block);
     }
   });
+
+
+  it('Get account balance', async function () {
+    assert.equal((await velasNative.getBalance('6hUNaeEwbpwEyQVgfTmZvMK1khqs18kq6sywDmRQgGyb')).VLX, 13);
+  });
+
+  // it('Transfer VLX and wait for confirmed transaction', async function () {
+  //   assert.isAbove((await velasNative.getBalance('Hj6ibSJDYE5nyNynGQiktsL8fuGqZrpeXatLG61hh4Sq')).VLX, 0.5);
+  //   const transactionID = await velasNative.transfer({ payerSeed: 'delay swift sick mixture vibrant element review arm snap true broccoli industry expect thought panel curve inhale rally dish close trade damp skin below', toAddress: 'Hj6ibSJDYE5nyNynGQiktsL8fuGqZrpeXatLG61hh4Sq' });
+  //   console.log(await velasNative.waitForConfirmedTransaction(transactionID));
+  //   await velasNative.getBalance('Hj6ibSJDYE5nyNynGQiktsL8fuGqZrpeXatLG61hh4Sq');
+  // });
 });
