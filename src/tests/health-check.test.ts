@@ -25,10 +25,17 @@ describe('Health check', function () {
     assert.equal((await velasNative.getBalance('6hUNaeEwbpwEyQVgfTmZvMK1khqs18kq6sywDmRQgGyb')).VLX, 13);
   });
 
-  // it('Transfer VLX and wait for confirmed transaction', async function () {
-  //   assert.isAbove((await velasNative.getBalance('Hj6ibSJDYE5nyNynGQiktsL8fuGqZrpeXatLG61hh4Sq')).VLX, 0.5);
-  //   const transactionID = await velasNative.transfer({ payerSeed: 'delay swift sick mixture vibrant element review arm snap true broccoli industry expect thought panel curve inhale rally dish close trade damp skin below', toAddress: 'Hj6ibSJDYE5nyNynGQiktsL8fuGqZrpeXatLG61hh4Sq' });
-  //   console.log(await velasNative.waitForConfirmedTransaction(transactionID));
-  //   await velasNative.getBalance('Hj6ibSJDYE5nyNynGQiktsL8fuGqZrpeXatLG61hh4Sq');
-  // });
+  it('Transfer VLX and wait for confirmed transaction', async function () {
+    const initialBalane = (await velasNative.getBalance('Hj6ibSJDYE5nyNynGQiktsL8fuGqZrpeXatLG61hh4Sq')).lamports;
+    const transferAmount = 1000000;
+    const transactionID = await velasNative.transfer({
+      payerSeed: 'delay swift sick mixture vibrant element review arm snap true broccoli industry expect thought panel curve inhale rally dish close trade damp skin below',
+      toAddress: 'Hj6ibSJDYE5nyNynGQiktsL8fuGqZrpeXatLG61hh4Sq',
+      lamports: transferAmount,
+    });
+    await velasNative.waitForConfirmedTransaction(transactionID);
+    // console.log(await velasNative.waitForConfirmedTransaction(transactionID));
+    const finalBalance = (await velasNative.getBalance('Hj6ibSJDYE5nyNynGQiktsL8fuGqZrpeXatLG61hh4Sq')).lamports;
+    assert.equal(finalBalance, initialBalane + transferAmount);
+  });
 });
