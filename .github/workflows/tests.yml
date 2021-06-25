@@ -12,5 +12,7 @@ jobs:
         working-directory: ./
 
     steps:
+      - name: prepare
+        run: npm i
       - name: run tests
         run: npm test
