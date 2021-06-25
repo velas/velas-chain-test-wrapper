@@ -6,10 +6,8 @@ import {
   SystemProgram,
   Transaction
 } from '@velas/solana-web3';
-import bs58 from 'bs58';
 import nacl from 'tweetnacl';
 import { log } from '../logger';
-import { testData } from '../test-data';
 import { helpers } from './helpers';
 
 class AccountObj {
@@ -137,12 +135,14 @@ export class VelasNative {
   async waitForConfirmedTransaction(signature: string, waitTime = 20) {
     let transaction = await this.connection!.getConfirmedTransaction(signature);
 
-    while (!transaction && waitTime > 0) {
-      waitTime--;
+    let transactionConfirmationTime = 0;
+    while (!transaction && transactionConfirmationTime <= waitTime) {
+      transactionConfirmationTime++;
       await helpers.sleep(1);
       transaction = await this.connection!.getConfirmedTransaction(signature);
     }
 
+    log.info(`Transaction was confirmed in ${transactionConfirmationTime} seconds`);
     if (transaction?.meta?.err) log.warn(`Transaction ${signature} has error\n${transaction?.meta?.err}`);
     if (!transaction) log.warn(`No confirmed transaction with signature ${signature}`);
     return transaction;

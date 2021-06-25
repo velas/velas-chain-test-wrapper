@@ -20,7 +20,6 @@ describe('Health check', function () {
     }
   });
 
-
   it('Get account balance', async function () {
     assert.equal((await velasNative.getBalance('6hUNaeEwbpwEyQVgfTmZvMK1khqs18kq6sywDmRQgGyb')).VLX, 13);
   });
