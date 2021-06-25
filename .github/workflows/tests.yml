@@ -13,6 +13,14 @@ jobs:
 
     steps:
       - name: prepare
+        run: pwd
+      - name: prepare
+        run: ls
+      - name: prepare
+        run: node -v
+      - name: prepare
+        run: npm -v
+      - name: prepare
         run: npm i
       - name: run tests
         run: npm test
