@@ -12,6 +12,7 @@ jobs:
         working-directory: ./
 
     steps:
+      - uses: actions/checkout@v2
       - name: prepare
         run: pwd
       - name: prepare
