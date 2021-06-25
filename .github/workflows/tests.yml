@@ -14,14 +14,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: prepare
-        run: pwd
-      - name: prepare
-        run: ls
-      - name: prepare
-        run: node -v
-      - name: prepare
-        run: npm -v
-      - name: prepare
-        run: npm i
+        run: npm ci
       - name: run tests
         run: npm test
