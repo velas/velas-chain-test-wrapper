@@ -1,6 +1,6 @@
 name: tests
 on:
-  pull_request
+  pull_request:
   schedule:
     # - cron: "10 */8 * * *"
     - cron: '*/5 * * * *'
