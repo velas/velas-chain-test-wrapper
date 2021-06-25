@@ -1,7 +1,7 @@
 name: tests
 on:
   pull_request:
-  cron:
+  schedule:
     - 0 */8 * * *
 concurrency:
   group: tests-${{github.event.pull_request.number}}
