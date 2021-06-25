@@ -2,7 +2,7 @@ name: tests
 on:
   pull_request:
   schedule:
-    - 0 */8 * * *
+    - cron: "0 */8 * * *"
 concurrency:
   group: tests-${{github.event.pull_request.number}}
   cancel-in-progress: true
