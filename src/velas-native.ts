@@ -134,7 +134,7 @@ export class VelasNative {
   /***
    * waitTime in seconds
    */
-  async waitForConfirmedTransaction(signature: string, waitTime = 20) {
+  async waitForConfirmedTransaction(signature: string, waitTime = 30) {
     let transaction = await this.connection!.getConfirmedTransaction(signature);
 
     let transactionConfirmationTime = 0;

@@ -1,21 +1,22 @@
 {
-  "name": "blockchain-tests",
-  "version": "1.0.0",
+  "name": "velas-chain-test-wrapper",
+  "version": "1.0.3",
   "description": "",
-  "main": "index.js",
+  "files": ["lib/**/*"],
+  "main": "lib/index.js",
   "scripts": {
     "test": "npx ts-mocha src/tests/health-check.test.ts"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/velas/blockchain-tests.git"
+    "url": "git+https://github.com/velas/velas-chain-test-wrapper.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/velas/blockchain-tests/issues"
+    "url": "https://github.com/velas/velas-chain-test-wrapper/issues"
   },
-  "homepage": "https://github.com/velas/blockchain-tests#readme",
+  "homepage": "https://github.com/velas/velas-chain-test-wrapper#readme",
   "devDependencies": {
     "@types/bs58": "^4.0.1",
     "@types/chai": "^4.2.18",
