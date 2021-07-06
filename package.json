@@ -1,6 +1,6 @@
 {
   "name": "velas-chain-test-wrapper",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "",
   "files": ["lib/**/*"],
   "main": "lib/index.js",
