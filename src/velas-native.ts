@@ -1,5 +1,6 @@
 import {
   Account,
+  ConfirmedBlock,
   Connection,
   PublicKey,
   sendAndConfirmRawTransaction,
@@ -7,7 +8,7 @@ import {
   Transaction
 } from '@velas/solana-web3';
 import nacl from 'tweetnacl';
-import { log } from '../logger';
+import { log } from './logger';
 import { helpers } from './helpers';
 
 class AccountObj {
@@ -50,7 +51,7 @@ export class VelasNative {
     return { lamports, VLX: VLXAmount };
   }
 
-  async getConfirmedBlock(slot: number) {
+  async getConfirmedBlock(slot: number): Promise<ConfirmedBlock> {
     if (!this.connection) {
       await this.establishConnection();
       if (!this.connection) throw new Error(`Cannot establish connection`);
@@ -58,6 +59,7 @@ export class VelasNative {
 
     const block = await this.connection.getConfirmedBlock(slot);
     log.info(block);
+    return block;
   }
 
   async getNonce(nonceAccount: string | PublicKey) {

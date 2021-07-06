@@ -1,4 +1,5 @@
-import { log } from '../../logger';
+import { log } from '../logger';
+import { testData } from '../test-data';
 import { assert } from '../assert';
 import { velasNative } from '../velas-native';
 
@@ -12,11 +13,14 @@ describe('Health check', function () {
 
   xit('No skipped blocks', async function () {
     const slot = await velasNative.getSlot();
-    const lastConfirmedBlock = slot - 100;
+    const lastConfirmedSlotNumber = slot - 100;
     // blocks in epoch – 432000
-    for (let block = lastConfirmedBlock; block >= lastConfirmedBlock - 43; block--) {
-      log.warn('block', block);
-      await velasNative.getConfirmedBlock(block);
+    for (let blockIndex = lastConfirmedSlotNumber; blockIndex >= lastConfirmedSlotNumber - 43; blockIndex--) {
+      log.warn('block', blockIndex);
+      const blockInfo = await velasNative.getConfirmedBlock(blockIndex);
+      if (!blockInfo) {
+        throw new Error(`No confirmed block found with slot number ${blockIndex}`);
+      }
     }
   });
 
@@ -28,12 +32,12 @@ describe('Health check', function () {
     const initialBalane = (await velasNative.getBalance('Hj6ibSJDYE5nyNynGQiktsL8fuGqZrpeXatLG61hh4Sq')).lamports;
     const transferAmount = 1000000;
     const transactionID = await velasNative.transfer({
-      payerSeed: 'delay swift sick mixture vibrant element review arm snap true broccoli industry expect thought panel curve inhale rally dish close trade damp skin below',
+      // payerSeed: 'delay swift sick mixture vibrant element review arm snap true broccoli industry expect thought panel curve inhale rally dish close trade damp skin below',
+      payerSeed: testData.payer.seed,
       toAddress: 'Hj6ibSJDYE5nyNynGQiktsL8fuGqZrpeXatLG61hh4Sq',
       lamports: transferAmount,
     });
     await velasNative.waitForConfirmedTransaction(transactionID);
-    // console.log(await velasNative.waitForConfirmedTransaction(transactionID));
     const finalBalance = (await velasNative.getBalance('Hj6ibSJDYE5nyNynGQiktsL8fuGqZrpeXatLG61hh4Sq')).lamports;
     assert.equal(finalBalance, initialBalane + transferAmount);
   });
