@@ -13,5 +13,5 @@ export const log = tracer.colorConsole({
       fatal: `${defaultLogFormat}\n{{stack}}`,
     },
   ],
-  level: 'info',
+  level: process.env.LOG_LEVEL || 'warn',
 });

@@ -9,3 +9,7 @@
 
 ### Build
 `tsc`
+
+### Publish package
+npm init --scope=@velas
+npm publish --access public

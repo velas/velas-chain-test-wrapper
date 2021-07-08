@@ -1,8 +1,10 @@
 {
-  "name": "velas-chain-test-wrapper",
-  "version": "1.0.4",
-  "description": "",
-  "files": ["lib/**/*"],
+  "name": "@velas/velas-chain-test-wrapper",
+  "version": "1.0.9",
+  "description": "Wrapper for velas chain testing",
+  "files": [
+    "lib/**/*"
+  ],
   "main": "lib/index.js",
   "scripts": {
     "test": "npx ts-mocha src/tests/health-check.test.ts"
@@ -11,7 +13,7 @@
     "type": "git",
     "url": "git+https://github.com/velas/velas-chain-test-wrapper.git"
   },
-  "author": "",
+  "author": "Velas / Oleksandr Pelykh",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/velas/velas-chain-test-wrapper/issues"
@@ -36,5 +38,8 @@
     "ts-mocha": "^8.0.0",
     "ts-node": "^10.0.0",
     "tweetnacl": "^1.0.3"
+  },
+  "directories": {
+    "lib": "lib"
   }
 }
