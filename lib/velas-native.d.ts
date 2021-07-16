@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import { ConfirmedBlock, Connection, PublicKey } from '@velas/solana-web3';
+import { ConfirmedBlock, Connection, PublicKey, StakeActivationData } from '@velas/solana-web3';
 export declare class VelasNative {
     connection: Connection | undefined;
     private establishConnection;
@@ -7,6 +7,7 @@ export declare class VelasNative {
         lamports: number;
         VLX: number;
     }>;
+    getStakeAccount(account: string): Promise<StakeActivationData>;
     getConfirmedBlock(slot: number): Promise<ConfirmedBlock>;
     getNonce(nonceAccount: string | PublicKey): Promise<import("@velas/solana-web3").NonceAccount | null>;
     getAccountInfo(publicKey: PublicKey): Promise<import("@velas/solana-web3").AccountInfo<Buffer> | null>;
