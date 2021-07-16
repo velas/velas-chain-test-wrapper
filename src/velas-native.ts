@@ -4,6 +4,7 @@ import {
   Connection,
   PublicKey,
   sendAndConfirmRawTransaction,
+  StakeActivationData,
   SystemProgram,
   Transaction
 } from '@velas/solana-web3';
@@ -49,6 +50,16 @@ export class VelasNative {
     const VLXAmount = lamports / 10 ** 9;
     log.info(`Balance: ${VLXAmount} VLX`);
     return { lamports, VLX: VLXAmount };
+  }
+
+  async getStakeAccount(account: string): Promise<StakeActivationData> {
+    if (!this.connection) {
+      await this.establishConnection();
+      if (!this.connection) throw new Error(`Cannot establish connection`);
+    }
+
+    const stakeAccountPubKey = new PublicKey(account);
+    return await this.connection.getStakeActivation(stakeAccountPubKey);
   }
 
   async getConfirmedBlock(slot: number): Promise<ConfirmedBlock> {
@@ -205,4 +216,5 @@ export const velasNative = new VelasNative();
 
   // const newAcc = new AccountObj('delay swift sick mixture vibrant element review arm snap true broccoli industry expect thought panel curve inhale rally dish close trade damp skin below');
   // console.log(bs58.encode(newAcc.pubKey));
+  // log.warn(await velasNative.getStakeAccount('5V2ACHWQPVX8K36C9USxrSV97se5SVio1kxvVd9vUokJ'));
 })();
