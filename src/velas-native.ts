@@ -36,7 +36,7 @@ export class VelasNative {
     const rpcUrl = 'https://api.testnet.velas.com';
     this.connection = new Connection(rpcUrl, 'confirmed');
     const version = await this.connection.getVersion();
-    log.info('Connection to cluster established:', rpcUrl, version);
+    log.debug('Connection to cluster established:', rpcUrl, version);
   }
 
   async getBalance(account: string | PublicKey): Promise<{ lamports: number, VLX: number }> {
@@ -221,7 +221,7 @@ export const velasNative = new VelasNative();
 
   // const newAcc = new AccountObj('delay swift sick mixture vibrant element review arm snap true broccoli industry expect thought panel curve inhale rally dish close trade damp skin below');
   // console.log(bs58.encode(newAcc.pubKey));
-  log.warn(await velasNative.getStakeAccount('59vpQgPoDEhux1G84jk6dbbARQqfUwYtohLU4fgdxFKG'));
+  // log.warn(await velasNative.getStakeAccount('59vpQgPoDEhux1G84jk6dbbARQqfUwYtohLU4fgdxFKG'));
   // log.warn(await velasNative.smth('7YgtFNgGu42z5uyAWkjkBWaBVNuHMu7nMWtS8222SpXL'));
   // log.warn(await velasNative.getEpochInfo());
 })();
