@@ -7,7 +7,7 @@ export declare class VelasNative {
         lamports: number;
         VLX: number;
     }>;
-    getStakeAccount(account: string): Promise<StakeActivationData>;
+    getStakeAccount(address: string): Promise<StakeActivationData>;
     getConfirmedBlock(slot: number): Promise<ConfirmedBlock>;
     getNonce(nonceAccount: string | PublicKey): Promise<import("@velas/solana-web3").NonceAccount | null>;
     getAccountInfo(publicKey: PublicKey): Promise<import("@velas/solana-web3").AccountInfo<Buffer> | null>;

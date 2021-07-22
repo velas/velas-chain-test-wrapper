@@ -52,13 +52,13 @@ export class VelasNative {
     return { lamports, VLX: VLXAmount };
   }
 
-  async getStakeAccount(account: string): Promise<StakeActivationData> {
+  async getStakeAccount(address: string): Promise<StakeActivationData> {
     if (!this.connection) {
       await this.establishConnection();
       if (!this.connection) throw new Error(`Cannot establish connection`);
     }
 
-    const stakeAccountPubKey = new PublicKey(account);
+    const stakeAccountPubKey = new PublicKey(address);
     return await this.connection.getStakeActivation(stakeAccountPubKey);
   }
 
@@ -146,13 +146,18 @@ export class VelasNative {
    * waitTime in seconds
    */
   async waitForConfirmedTransaction(signature: string, waitTime = 30) {
+    if (!this.connection) {
+      await this.establishConnection();
+      if (!this.connection) throw new Error(`Cannot establish connection`);
+    }
+
     let transaction = await this.connection!.getConfirmedTransaction(signature);
 
     let transactionConfirmationTime = 0;
     while (!transaction && transactionConfirmationTime <= waitTime) {
       transactionConfirmationTime++;
       await helpers.sleep(1);
-      transaction = await this.connection!.getConfirmedTransaction(signature);
+      transaction = await this.connection.getConfirmedTransaction(signature);
     }
 
     log.info(`Transaction was confirmed in ${transactionConfirmationTime} seconds`);
@@ -216,5 +221,7 @@ export const velasNative = new VelasNative();
 
   // const newAcc = new AccountObj('delay swift sick mixture vibrant element review arm snap true broccoli industry expect thought panel curve inhale rally dish close trade damp skin below');
   // console.log(bs58.encode(newAcc.pubKey));
-  // log.warn(await velasNative.getStakeAccount('5V2ACHWQPVX8K36C9USxrSV97se5SVio1kxvVd9vUokJ'));
+  log.warn(await velasNative.getStakeAccount('59vpQgPoDEhux1G84jk6dbbARQqfUwYtohLU4fgdxFKG'));
+  // log.warn(await velasNative.smth('7YgtFNgGu42z5uyAWkjkBWaBVNuHMu7nMWtS8222SpXL'));
+  // log.warn(await velasNative.getEpochInfo());
 })();
