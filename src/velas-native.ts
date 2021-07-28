@@ -6,11 +6,15 @@ import {
   sendAndConfirmRawTransaction,
   StakeActivationData,
   SystemProgram,
-  Transaction
+  Transaction,
+  StakeProgram,
+  CreateStakeAccountParams
 } from '@velas/solana-web3';
 import nacl from 'tweetnacl';
 import { log } from './logger';
 import { helpers } from './helpers';
+import * as bip39 from 'bip39';
+import bs58 from 'bs58';
 
 class AccountObj {
   account;
@@ -61,6 +65,48 @@ export class VelasNative {
     const stakeAccountPubKey = new PublicKey(address);
     return await this.connection.getStakeActivation(stakeAccountPubKey);
   }
+
+  async getKeysFromSeed(seedPhrase: string) {
+    const seed = await bip39.mnemonicToSeed(seedPhrase);
+    const keyPair = nacl.sign.keyPair.fromSeed(seed.slice(0, 32));
+    
+    const address = bs58.encode(keyPair.publicKey);
+    const privateKey = bs58.encode(keyPair.secretKey);
+
+    // log.warn(address, privateKey);
+
+    // this code generates random seed
+    // const mnamonicForNewOpKey = bip39.generateMnemonic();
+    // const seedForNewOpKey = await bip39.mnemonicToSeed(mnamonicForNewOpKey);
+    
+    // const keyPairOperational = nacl.sign.keyPair.fromSeed(seedForNewOpKey.slice(0, 32));
+    // const pair = nacl.sign.keyPair();
+    // const secret = bs58.encode(keyPairOperational.secretKey);
+    // const op_key = bs58.encode(keyPairOperational.publicKey);
+  }
+
+  // async createStakeAccount(address: string): Promise<StakeActivationData> {
+  //   if (!this.connection) {
+  //     await this.establishConnection();
+  //     if (!this.connection) throw new Error(`Cannot establish connection`);
+  //   }
+
+  //   const stakeAccount = StakeProgram.createAccount({
+  //     authorized: {
+  //       staker: new PublicKey(''),
+  //       withdrawer: new PublicKey('D25HT9pVmScZjz3DfNUFRb6Ci786DxSsjqyEYGA7nm1f'),
+  //     },
+  //     fromPubkey: ,
+  //     lamports: ,
+  //     stakePubkey: ,
+  //     lockup: ,
+  //   })
+
+  //   const stakeAccountPubKey = new PublicKey(address);
+  //   return await this.connection.getStakeActivation(stakeAccountPubKey);
+
+
+  // }
 
   async getConfirmedBlock(slot: number): Promise<ConfirmedBlock> {
     if (!this.connection) {
@@ -161,8 +207,8 @@ export class VelasNative {
     }
 
     log.info(`Transaction was confirmed in ${transactionConfirmationTime} seconds`);
-    if (transaction?.meta?.err) log.warn(`Transaction ${signature} has error\n${transaction?.meta?.err}`);
-    if (!transaction) log.warn(`No confirmed transaction with signature ${signature}`);
+    if (transaction?.meta?.err) throw new Error(`Transaction ${signature} has error\n${transaction?.meta?.err}`);
+    if (!transaction) throw new Error(`No confirmed transaction with signature ${signature}`);
     return transaction;
   }
 
@@ -203,7 +249,6 @@ export const velasNative = new VelasNative();
 
 (async () => {
   // await velasWeb3.getTransaction('6pYCFnhaMd8eZAQWT5aM1GaY75yUq6bVE7houhU9jnTKufBVb3uomzkEY2t7jRFSACn8D94rG3XgP2pos9FZXo7');
-  // await transfer();
   // await velasWeb3.getEpochInfo();
   // await velasNative.getEpochInfo();
   // const slot = await velasNative.getSlot();
@@ -213,7 +258,7 @@ export const velasNative = new VelasNative();
   // await getAccountInfo(new PublicKey('9kMFdW1VENdVpMyG9NNadNTzwXghknj3iU7CUwYFP1GC'));
   // await velasNative.getBalance('');
   // await velasNative.getBalance('6hUNaeEwbpwEyQVgfTmZvMK1khqs18kq6sywDmRQgGyb');
-  // const transactionID = await velasNative.transfer({ payerSeed: testData.payer.seed, toAddress: '', lamports: 13000000000 });
+  // const transactionID = await velasNative.transfer({ payerSeed: 'swap shock angry lucky clip heart chair point humble release west heart market fix pledge gift north panther muffin badge leisure client awake bunker', toAddress: 'Dawj15q13fqzh4baHqmD2kbrRCyiFfkE6gkPcUZ21KUS', lamports: 13000000000 });
   // await velasNative.getBalance('6hUNaeEwbpwEyQVgfTmZvMK1khqs18kq6sywDmRQgGyb');
   // console.log(await velasNative.waitForConfirmedTransaction(transactionID));
   // await velasNative.getBalance('Hj6ibSJDYE5nyNynGQiktsL8fuGqZrpeXatLG61hh4Sq');
@@ -224,4 +269,6 @@ export const velasNative = new VelasNative();
   // log.warn(await velasNative.getStakeAccount('59vpQgPoDEhux1G84jk6dbbARQqfUwYtohLU4fgdxFKG'));
   // log.warn(await velasNative.smth('7YgtFNgGu42z5uyAWkjkBWaBVNuHMu7nMWtS8222SpXL'));
   // log.warn(await velasNative.getEpochInfo());
+  // await velasNative.('2K1h1vHRXKeo5iNCYtP5wvFXdbvY6TWwSPUyi2ViXap23rWYJW1G8gce1JCGnqGzMqLTGpRhRFQwrF3DwyPT1oUH');
+
 })();
