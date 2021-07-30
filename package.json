@@ -1,6 +1,6 @@
 {
   "name": "@velas/velas-chain-test-wrapper",
-  "version": "1.1.13",
+  "version": "1.1.14",
   "description": "Wrapper for velas chain testing",
   "files": [
     "lib/**/*"
