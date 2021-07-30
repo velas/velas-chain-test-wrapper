@@ -8,6 +8,7 @@ export declare class VelasNative {
         VLX: number;
     }>;
     getStakeAccount(address: string): Promise<StakeActivationData>;
+    getKeysFromSeed(seedPhrase: string): Promise<void>;
     getConfirmedBlock(slot: number): Promise<ConfirmedBlock>;
     getNonce(nonceAccount: string | PublicKey): Promise<import("@velas/solana-web3").NonceAccount | null>;
     getAccountInfo(publicKey: PublicKey): Promise<import("@velas/solana-web3").AccountInfo<Buffer> | null>;
@@ -18,7 +19,7 @@ export declare class VelasNative {
     /***
      * waitTime in seconds
      */
-    waitForConfirmedTransaction(signature: string, waitTime?: number): Promise<import("@velas/solana-web3").ConfirmedTransaction | null>;
+    waitForConfirmedTransaction(signature: string, waitTime?: number): Promise<import("@velas/solana-web3").ConfirmedTransaction>;
     transfer(params: {
         payerSeed: string;
         toAddress: string;
