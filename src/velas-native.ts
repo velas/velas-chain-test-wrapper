@@ -1,20 +1,17 @@
 import {
-  Account,
-  ConfirmedBlock,
+  Account, AccountMeta, ConfirmedBlock,
   Connection,
   PublicKey,
   sendAndConfirmRawTransaction,
   StakeActivationData,
   SystemProgram,
-  Transaction,
-  StakeProgram,
-  CreateStakeAccountParams
+  Transaction, TransactionInstruction
 } from '@velas/solana-web3';
-import nacl from 'tweetnacl';
-import { log } from './logger';
-import { helpers } from './helpers';
 import * as bip39 from 'bip39';
 import bs58 from 'bs58';
+import nacl from 'tweetnacl';
+import { helpers } from './helpers';
+import { log } from './logger';
 
 class AccountObj {
   account;
@@ -69,7 +66,7 @@ export class VelasNative {
   async getKeysFromSeed(seedPhrase: string) {
     const seed = await bip39.mnemonicToSeed(seedPhrase);
     const keyPair = nacl.sign.keyPair.fromSeed(seed.slice(0, 32));
-    
+
     const address = bs58.encode(keyPair.publicKey);
     const privateKey = bs58.encode(keyPair.secretKey);
 
@@ -78,7 +75,7 @@ export class VelasNative {
     // this code generates random seed
     // const mnamonicForNewOpKey = bip39.generateMnemonic();
     // const seedForNewOpKey = await bip39.mnemonicToSeed(mnamonicForNewOpKey);
-    
+
     // const keyPairOperational = nacl.sign.keyPair.fromSeed(seedForNewOpKey.slice(0, 32));
     // const pair = nacl.sign.keyPair();
     // const secret = bs58.encode(keyPairOperational.secretKey);
@@ -212,7 +209,15 @@ export class VelasNative {
     return transaction;
   }
 
-  async transfer(params: { payerSeed: string, toAddress: string, lamports: number }): Promise<string> {
+  async transfer(params: {
+    payerSeed: string,
+    toAddress: string,
+    lamports: number
+  }, instructionData?: {
+    keys?: AccountMeta[],
+    programID?: string,
+    data: string,
+  }): Promise<string> {
     if (!this.connection) {
       await this.establishConnection();
       if (!this.connection) throw new Error(`Cannot establish connection`);
@@ -229,6 +234,16 @@ export class VelasNative {
 
     const { blockhash: recentBlockhash } = await this.connection.getRecentBlockhash();
     const tx = new Transaction({ recentBlockhash, feePayer: new PublicKey(payer.pubKey) }).add(transactionInsctruction);
+
+    if (instructionData) {
+      const instruction = new TransactionInstruction({
+        keys: instructionData?.keys || [],
+        programId: new PublicKey(instructionData?.programID || 'GW5kcMNyviBQkU8hxPBSYY2BfAhXbkAraEZsMRLE36ak'),
+        data: Buffer.from(instructionData?.data),
+      });
+      tx.add(instruction);
+    }
+
     tx.sign(payer.account);
 
     const transactionId = await sendAndConfirmRawTransaction(
@@ -258,7 +273,20 @@ export const velasNative = new VelasNative();
   // await getAccountInfo(new PublicKey('9kMFdW1VENdVpMyG9NNadNTzwXghknj3iU7CUwYFP1GC'));
   // await velasNative.getBalance('');
   // await velasNative.getBalance('6hUNaeEwbpwEyQVgfTmZvMK1khqs18kq6sywDmRQgGyb');
-  // const transactionID = await velasNative.transfer({ payerSeed: 'swap shock angry lucky clip heart chair point humble release west heart market fix pledge gift north panther muffin badge leisure client awake bunker', toAddress: 'Dawj15q13fqzh4baHqmD2kbrRCyiFfkE6gkPcUZ21KUS', lamports: 13000000000 });
+
+  // 2DKco1JBu1zshWDLmCp34AVgE6YkAu9BPmgbbgRuCoGm
+  // const transactionID = await velasNative.transfer({
+  //   payerSeed: 'delay swift sick mixture vibrant element review arm snap true broccoli industry expect thought panel curve inhale rally dish close trade damp skin below',
+  //   toAddress: 'DAWxo9UT6jCfCWZSoJGaU14Fjjr5boCKyNe8J6SWmcTC',
+  //   lamports: 501
+  // }
+  //   , {
+  //     keys: [],
+  //     programID: 'GW5kcMNyviBQkU8hxPBSYY2BfAhXbkAraEZsMRLE36ak',
+  //     data: '92d8a38b-ef67-4abf-8458-8bda99eeacf13',
+  //   }
+  // );
+  // log.warn(transactionID);
   // await velasNative.getBalance('6hUNaeEwbpwEyQVgfTmZvMK1khqs18kq6sywDmRQgGyb');
   // console.log(await velasNative.waitForConfirmedTransaction(transactionID));
   // await velasNative.getBalance('Hj6ibSJDYE5nyNynGQiktsL8fuGqZrpeXatLG61hh4Sq');
