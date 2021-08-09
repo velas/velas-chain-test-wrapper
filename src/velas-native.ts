@@ -214,8 +214,8 @@ export class VelasNative {
     toAddress: string,
     lamports: number
   }, instructionData?: {
-    keys?: AccountMeta[],
-    programID?: string,
+    keys: AccountMeta[],
+    programID: string,
     data: string,
   }): Promise<string> {
     if (!this.connection) {
@@ -237,8 +237,8 @@ export class VelasNative {
 
     if (instructionData) {
       const instruction = new TransactionInstruction({
-        keys: instructionData?.keys || [],
-        programId: new PublicKey(instructionData?.programID || 'GW5kcMNyviBQkU8hxPBSYY2BfAhXbkAraEZsMRLE36ak'),
+        keys: instructionData?.keys,
+        programId: new PublicKey(instructionData?.programID),
         data: Buffer.from(instructionData?.data),
       });
       tx.add(instruction);
@@ -275,17 +275,17 @@ export const velasNative = new VelasNative();
   // await velasNative.getBalance('6hUNaeEwbpwEyQVgfTmZvMK1khqs18kq6sywDmRQgGyb');
 
   // 2DKco1JBu1zshWDLmCp34AVgE6YkAu9BPmgbbgRuCoGm
-  // const transactionID = await velasNative.transfer({
-  //   payerSeed: 'delay swift sick mixture vibrant element review arm snap true broccoli industry expect thought panel curve inhale rally dish close trade damp skin below',
-  //   toAddress: 'DAWxo9UT6jCfCWZSoJGaU14Fjjr5boCKyNe8J6SWmcTC',
-  //   lamports: 501
-  // }
-  //   , {
-  //     keys: [],
-  //     programID: 'GW5kcMNyviBQkU8hxPBSYY2BfAhXbkAraEZsMRLE36ak',
-  //     data: '92d8a38b-ef67-4abf-8458-8bda99eeacf13',
-  //   }
-  // );
+  const transactionID = await velasNative.transfer({
+    payerSeed: 'delay swift sick mixture vibrant element review arm snap true broccoli industry expect thought panel curve inhale rally dish close trade damp skin below',
+    toAddress: 'DAWxo9UT6jCfCWZSoJGaU14Fjjr5boCKyNe8J6SWmcTC',
+    lamports: 501
+  }
+    , {
+      keys: [],
+      programID: 'GW5kcMNyviBQkU8hxPBSYY2BfAhXbkAraEZsMRLE36ak',
+      data: '92d8a38b-ef67-4abf-8458-8bda99eeacf13',
+    }
+  );
   // log.warn(transactionID);
   // await velasNative.getBalance('6hUNaeEwbpwEyQVgfTmZvMK1khqs18kq6sywDmRQgGyb');
   // console.log(await velasNative.waitForConfirmedTransaction(transactionID));
