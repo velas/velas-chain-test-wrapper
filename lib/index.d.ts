@@ -1,1 +1,1 @@
-export { VelasNative } from './velas-native';
+export { VelasNative, velasNative } from './velas-native';
