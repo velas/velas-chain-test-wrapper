@@ -25,8 +25,8 @@ export declare class VelasNative {
         toAddress: string;
         lamports: number;
     }, instructionData?: {
-        keys?: AccountMeta[];
-        programID?: string;
+        keys: AccountMeta[];
+        programID: string;
         data: string;
     }): Promise<string>;
 }
