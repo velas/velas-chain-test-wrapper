@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import { ConfirmedBlock, Connection, PublicKey, StakeActivationData } from '@velas/solana-web3';
+import { AccountMeta, ConfirmedBlock, Connection, PublicKey, StakeActivationData } from '@velas/solana-web3';
 export declare class VelasNative {
     connection: Connection | undefined;
     private establishConnection;
@@ -24,6 +24,10 @@ export declare class VelasNative {
         payerSeed: string;
         toAddress: string;
         lamports: number;
+    }, instructionData?: {
+        keys?: AccountMeta[];
+        programID?: string;
+        data: string;
     }): Promise<string>;
 }
 export declare const velasNative: VelasNative;
