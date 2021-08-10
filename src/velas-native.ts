@@ -18,13 +18,17 @@ class AccountObj {
   bufferedSeed;
   keyPair;
   pubKey;
+  pubKeyEncoded;
   secretKey;
+  secretKeyEncoded;
 
   constructor(public seed: string) {
     this.bufferedSeed = Buffer.from(seed);
     this.keyPair = nacl.sign.keyPair.fromSeed(this.bufferedSeed.slice(0, 32));
     this.secretKey = this.keyPair.secretKey;
     this.pubKey = this.keyPair.publicKey;
+    this.pubKeyEncoded = bs58.encode(this.pubKey);
+    this.secretKeyEncoded = bs58.encode(this.secretKey);
     // const pubKey = bs58.encode(keyPair.publicKey);
     this.account = new Account(this.secretKey);
   }
@@ -38,6 +42,11 @@ export class VelasNative {
     this.connection = new Connection(rpcUrl, 'confirmed');
     const version = await this.connection.getVersion();
     log.debug('Connection to cluster established:', rpcUrl, version);
+  }
+
+  createAccount(): AccountObj {
+    const generatedMnemonic = bip39.generateMnemonic();
+    return new AccountObj(generatedMnemonic);
   }
 
   async getBalance(account: string | PublicKey): Promise<{ lamports: number, VLX: number }> {
@@ -275,6 +284,23 @@ export const velasNative = new VelasNative();
   // await velasNative.getBalance('6hUNaeEwbpwEyQVgfTmZvMK1khqs18kq6sywDmRQgGyb');
 
   // 2DKco1JBu1zshWDLmCp34AVgE6YkAu9BPmgbbgRuCoGm
+
+  // const generatedMnemonic = bip39.generateMnemonic();
+  // log.warn(generatedMnemonic);
+  // const seed = await bip39.mnemonicToSeed(generatedMnemonic);
+  // log.warn(seed);
+
+  // const keyPairOperational = nacl.sign.keyPair.fromSeed(seed.slice(0, 32));
+  // const pair = nacl.sign.keyPair();
+  // const secret = bs58.encode(keyPairOperational.secretKey);
+  // const op_key = bs58.encode(keyPairOperational.publicKey);
+  // log.info(secret);
+  // log.info(op_key);
+
+  // const acc = velasNative.createAccount();
+  // log.warn(JSON.stringify(acc, null, 2));
+
+
   // const transactionID = await velasNative.transfer({
   //   payerSeed: 'delay swift sick mixture vibrant element review arm snap true broccoli industry expect thought panel curve inhale rally dish close trade damp skin below',
   //   toAddress: 'DAWxo9UT6jCfCWZSoJGaU14Fjjr5boCKyNe8J6SWmcTC',
@@ -283,9 +309,10 @@ export const velasNative = new VelasNative();
   //   , {
   //     keys: [],
   //     programID: 'GW5kcMNyviBQkU8hxPBSYY2BfAhXbkAraEZsMRLE36ak',
-  //     data: '92d8a38b-ef67-4abf-8458-8bda99eeacf13',
+  //     data: '62e828ba-80e5-4e9f-adce-8bb71ec8eeb6',
   //   }
   // );
+
   // log.warn(transactionID);
   // await velasNative.getBalance('6hUNaeEwbpwEyQVgfTmZvMK1khqs18kq6sywDmRQgGyb');
   // console.log(await velasNative.waitForConfirmedTransaction(transactionID));
