@@ -267,6 +267,22 @@ export class VelasNative {
     log.info('Transaction ID:', transactionId);
     return transactionId;
   }
+
+  async replenish(toAddress: string, lamports: number): Promise<void> {
+    if (lamports > 100 * 10 ** 9) throw new Error(`You try to replenish wallet with too much funds. Please use <100 VLX`);
+
+    if (!this.connection) {
+      await this.establishConnection();
+      if (!this.connection) throw new Error(`Cannot establish connection`);
+    }
+
+    const tx = await this.transfer({
+      payerSeed: 'delay swift sick mixture vibrant element review arm snap true broccoli industry expect thought panel curve inhale rally dish close trade damp skin below',
+      lamports,
+      toAddress,
+    });
+    await this.waitForConfirmedTransaction(tx);
+  }
 }
 
 export const velasNative = new VelasNative();
@@ -298,7 +314,13 @@ export const velasNative = new VelasNative();
   // log.info(op_key);
 
   // const acc = velasNative.createAccount();
-  // log.warn(JSON.stringify(acc, null, 2));
+  // await velasNative.replenish(acc.pubKeyEncoded, 10 ** 4);
+  // // await velasNative.getBalance(acc.pubKeyEncoded);
+  // // log.warn(acc.pubKeyEncoded);
+  
+  // await velasNative.transfer({payerSeed: acc.seed, toAddress: 'EcC91Vj9AB8PqryPjHmS6w55M6fHrRA7sRzzwbYgiCoX', lamports: 1});
+  // log.warn(await velasNative.getBalance(acc.pubKeyEncoded));
+ 
 
 
   // const transactionID = await velasNative.transfer({
