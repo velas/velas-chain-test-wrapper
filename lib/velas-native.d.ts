@@ -1,8 +1,21 @@
 /// <reference types="node" />
-import { AccountMeta, ConfirmedBlock, Connection, PublicKey, StakeActivationData } from '@velas/solana-web3';
+import { Account, AccountMeta, ConfirmedBlock, Connection, PublicKey, StakeActivationData } from '@velas/solana-web3';
+import nacl from 'tweetnacl';
+declare class AccountObj {
+    seed: string;
+    account: Account;
+    bufferedSeed: Buffer;
+    keyPair: nacl.SignKeyPair;
+    pubKey: Uint8Array;
+    pubKeyEncoded: string;
+    secretKey: Uint8Array;
+    secretKeyEncoded: string;
+    constructor(seed: string);
+}
 export declare class VelasNative {
     connection: Connection | undefined;
     private establishConnection;
+    createAccount(): AccountObj;
     getBalance(account: string | PublicKey): Promise<{
         lamports: number;
         VLX: number;
@@ -29,5 +42,7 @@ export declare class VelasNative {
         programID: string;
         data: string;
     }): Promise<string>;
+    replenish(toAddress: string, lamports: number): Promise<void>;
 }
 export declare const velasNative: VelasNative;
+export {};
