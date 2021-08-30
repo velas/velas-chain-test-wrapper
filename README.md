@@ -29,3 +29,5 @@ npm publish --access public
 3. Create .json file with this array.
 4. Run next command
 `velas-keygen pubkey <path_to_file>`
+
+If you get the wallet address without any errors and this address corresponds to the address from wallet app – all is fine.
