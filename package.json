@@ -2,6 +2,7 @@
   "name": "@velas/velas-chain-test-wrapper",
   "version": "1.3.0",
   "description": "Wrapper for velas chain testing",
+  "typings": "lib/index.d.ts",
   "files": [
     "lib/**/*"
   ],

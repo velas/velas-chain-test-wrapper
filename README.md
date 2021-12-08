@@ -1,11 +1,19 @@
-## This repo is wrapper for velas chain testing.
+## This repo is wrapper for velas chain testing
 
 ### Currenyly exported modules:
-- VelasNative
+- velasNative
 
 ### Modules in progress:
 - VelasEVM
 
+### Use
+`npm i`
+`import {velasNative} from './src'`
+
+### Run test
+`npm test`
+or
+`npx ts-mocha ./src/tests/**`
 
 ### Build
 `tsc`
@@ -15,7 +23,7 @@ npm init --scope=@velas
 npm publish --access public
 
 
-## How to test private key validity
+#### How to test private key validity
 1. Export private key from wallet.
 2. Call `bs58EncodedPrivateKeyToBytesArray` method from `helpers` (which is part of this lib) and pass exported key as parameter.
 
