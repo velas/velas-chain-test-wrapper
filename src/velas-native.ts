@@ -37,11 +37,12 @@ class AccountObj {
 export class VelasNative {
   connection: Connection | undefined;
 
+  constructor(public rpcURL = 'https://api.testnet.velas.com') { };
+
   private async establishConnection(): Promise<void> {
-    const rpcUrl = 'https://api.testnet.velas.com';
-    this.connection = new Connection(rpcUrl, 'confirmed');
+    this.connection = new Connection(this.rpcURL, 'confirmed');
     const version = await this.connection.getVersion();
-    log.debug('Connection to cluster established:', rpcUrl, version);
+    log.debug('Connection to cluster established:', this.rpcURL, version);
   }
 
   createAccount(): AccountObj {
@@ -208,7 +209,7 @@ export class VelasNative {
     let transactionConfirmationTime = 0;
     while (!transaction && transactionConfirmationTime <= waitTime) {
       transactionConfirmationTime++;
-      await helpers.sleep(1);
+      await helpers.sleep(1000);
       transaction = await this.connection.getConfirmedTransaction(signature);
     }
 
@@ -317,10 +318,10 @@ export const velasNative = new VelasNative();
   // await velasNative.replenish(acc.pubKeyEncoded, 10 ** 4);
   // // await velasNative.getBalance(acc.pubKeyEncoded);
   // // log.warn(acc.pubKeyEncoded);
-  
+
   // await velasNative.transfer({payerSeed: acc.seed, toAddress: 'EcC91Vj9AB8PqryPjHmS6w55M6fHrRA7sRzzwbYgiCoX', lamports: 1});
   // log.warn(await velasNative.getBalance(acc.pubKeyEncoded));
- 
+
 
 
   // const transactionID = await velasNative.transfer({
