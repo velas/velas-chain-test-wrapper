@@ -1,14 +1,18 @@
-## This repo is wrapper for velas chain testing
+## This repo is a wrapper for velas chain testing
 
 ### Currenyly exported modules:
 - velasNative
 
 ### Modules in progress:
-- VelasEVM
+- velasEVM
 
-### Use
-`npm i`
-`import {velasNative} from './src'`
+### Usage example
+
+```
+npm i`
+import {velasNative} from './src'
+await velasNative.getBalance('DVSjUmoQistXei6HTw7mtv1ufnm7RVCn1JVZ3EGGAL1z');
+```
 
 ### Run test
 `npm test`
