@@ -1,8 +1,8 @@
 import bs58 from "bs58";
 
 export const helpers = {
-  async sleep(seconds: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+  async sleep(miliSeconds: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, miliSeconds));
   },
 
   stringify(json: any): string {
