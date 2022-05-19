@@ -32,7 +32,6 @@ describe('Health check', function () {
     const initialBalane = (await velasNative.getBalance('Hj6ibSJDYE5nyNynGQiktsL8fuGqZrpeXatLG61hh4Sq')).lamports;
     const transferAmount = 1000000;
     const transactionID = await velasNative.transfer({
-      // payerSeed: 'delay swift sick mixture vibrant element review arm snap true broccoli industry expect thought panel curve inhale rally dish close trade damp skin below',
       payerSeed: testData.payer.seed,
       toAddress: 'Hj6ibSJDYE5nyNynGQiktsL8fuGqZrpeXatLG61hh4Sq',
       lamports: transferAmount,
@@ -42,7 +41,6 @@ describe('Health check', function () {
     assert.equal(finalBalance, initialBalane + transferAmount);
   });
 });
-
 
 // TODO:
 // create account
