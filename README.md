@@ -9,7 +9,7 @@
 ### Usage example
 
 ```
-npm i`
+npm i
 import {velasNative} from './src'
 await velasNative.getBalance('DVSjUmoQistXei6HTw7mtv1ufnm7RVCn1JVZ3EGGAL1z');
 ```

@@ -39,10 +39,20 @@ export class VelasNative {
   constructor(public rpcURL = 'https://api.testnet.velas.com') { };
 
   private async establishConnection(): Promise<Connection> {
-    this.connection = new Connection(this.rpcURL, 'confirmed');
-    const version = await this.connection.getVersion();
-    log.debug('Connection to cluster established:', this.rpcURL, version);
-    if (!this.connection) throw new Error(`Cannot establish connection`);
+    let connected = false;
+    while (!connected) {
+      try {
+        this.connection = new Connection(this.rpcURL, 'confirmed');
+        const version = await this.connection.getVersion();
+        if (!version) throw new Error(`Cannot get version`);
+        log.debug('Connection to cluster established:', this.rpcURL, version);
+        connected = true;
+      } catch {
+        log.warn('Cannot establish connection to web3. Retry...');
+        await helpers.sleep(1000);
+      }
+    }
+    if (!this.connection) throw new Error(`Cannot establish connection to web3`);
     return this.connection;
   }
 
@@ -51,13 +61,19 @@ export class VelasNative {
     return new AccountObj(generatedMnemonic);
   }
 
+  async test() {
+    console.log('test');
+  }
+
   async getBalance(account: string | PublicKey): Promise<{ lamports: number, VLX: number }> {
     const connection = await this.establishConnection();
 
     let publicKey = typeof account === 'string' ? new PublicKey(account) : account;
     const lamports = await connection.getBalance(publicKey);
     const VLXAmount = lamports / 10 ** 9;
+    log.info(`- - - - - - - - - - - - - - - - - - - - - - - - `);
     log.info(`Balance: ${VLXAmount} VLX`);
+    log.info(`- - - - - - - - - - - - - - - - - - - - - - - - `);
     return { lamports, VLX: VLXAmount };
   }
 
@@ -73,6 +89,8 @@ export class VelasNative {
 
     function deriveSeed(seed: string) {
       const derivationPath = "m/44'/5655640'/0'/0'";
+      // derivedSeed = bip32.fromSeed(seed).derivePath("m/44'/5655640'/" + index + "'/0").privateKey;
+
       return ed25519.derivePath(derivationPath, seed).key;
     }
 
@@ -101,32 +119,32 @@ export class VelasNative {
   }
 
 
-  async createStakeAccount(address: string): Promise<StakeActivationData> {
-    if (!this.connection) {
-      await this.establishConnection();
-      if (!this.connection) throw new Error(`Cannot establish connection`);
-    }
+  // async createStakeAccount(address: string): Promise<StakeActivationData> {
+  //   if (!this.connection) {
+  //     await this.establishConnection();
+  //     if (!this.connection) throw new Error(`Cannot establish connection`);
+  //   }
 
-    const authorized = new Authorized(new PublicKey('D25HT9pVmScZjz3DfNUFRb6Ci786DxSsjqyEYGA7nm1f'), new PublicKey('D25HT9pVmScZjz3DfNUFRb6Ci786DxSsjqyEYGA7nm1f'));
+  //   const authorized = new Authorized(new PublicKey('D25HT9pVmScZjz3DfNUFRb6Ci786DxSsjqyEYGA7nm1f'), new PublicKey('D25HT9pVmScZjz3DfNUFRb6Ci786DxSsjqyEYGA7nm1f'));
 
-    const stakeAccount = StakeProgram.createAccount({
-      authorized,
-      fromPubkey: new PublicKey('D25HT9pVmScZjz3DfNUFRb6Ci786DxSsjqyEYGA7nm1f'),
-      lamports: 2000000000,
-      stakePubkey: new PublicKey('D25HT9pVmScZjz3DfNUFRb6Ci786DxSsjqyEYGA7nm1f'),
-    });
+  //   const stakeAccount = StakeProgram.createAccount({
+  //     authorized,
+  //     fromPubkey: new PublicKey('D25HT9pVmScZjz3DfNUFRb6Ci786DxSsjqyEYGA7nm1f'),
+  //     lamports: 2000000000,
+  //     stakePubkey: new PublicKey('D25HT9pVmScZjz3DfNUFRb6Ci786DxSsjqyEYGA7nm1f'),
+  //   });
 
-    // const stakeAccountPubKey = new PublicKey(address);
+  //   // const stakeAccountPubKey = new PublicKey(address);
 
-    const stakePubkey = await PublicKey.createWithSeed(
-      new PublicKey('D25HT9pVmScZjz3DfNUFRb6Ci786DxSsjqyEYGA7nm1f'),
-      1.toString(),
-      StakeProgram.programId,
-    );
+  //   const stakePubkey = await PublicKey.createWithSeed(
+  //     new PublicKey('D25HT9pVmScZjz3DfNUFRb6Ci786DxSsjqyEYGA7nm1f'),
+  //     1.toString(),
+  //     StakeProgram.programId,
+  //   );
 
 
-    return await this.connection.getStakeActivation(stakeAccountPubKey);
-  }
+  //   return await this.connection.getStakeActivation(stakeAccountPubKey);
+  // }
 
 
 
@@ -426,8 +444,10 @@ export const velasNative = new VelasNative();
 
 })();
 
-(async () => {
-  const velasNative = new VelasNative();
-  const keys = await velasNative.getKeysFromSeed('defy come soul owner screen fiction kingdom cliff quit observe skill wide');
-  console.log(await velasNative.getBalance('G3bCTXjguwwiMBaVknjKooVjVCZqd1ZoobN6a8GNfkMz'));
-})();
+// (async () => {
+//   const velasNative = new VelasNative();
+//   const keys = await velasNative.getKeysFromSeed('defy come soul owner screen fiction kingdom cliff quit observe skill wide');
+//   console.log(velasNative.getBalance('G3bCTXjguwwiMBaVknjKooVjVCZqd1ZoobN6a8GNfkMz'));
+
+//   console.log(await velasNative.getBalance('G3bCTXjguwwiMBaVknjKooVjVCZqd1ZoobN6a8GNfkMz'));
+// })();
