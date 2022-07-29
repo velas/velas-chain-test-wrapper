@@ -362,6 +362,7 @@ export class VelasNative {
     );
 
     log.info('Transaction ID:', transactionId);
+    if (!transactionId) throw new Error('Transaction failed');
     return transactionId;
   }
 
@@ -446,8 +447,23 @@ export const velasNative = new VelasNative();
 
 // (async () => {
 //   const velasNative = new VelasNative();
-//   const keys = await velasNative.getKeysFromSeed('defy come soul owner screen fiction kingdom cliff quit observe skill wide');
-//   console.log(velasNative.getBalance('G3bCTXjguwwiMBaVknjKooVjVCZqd1ZoobN6a8GNfkMz'));
+//   const hash = await velasNative.transfer(
+//     {
+//       payerSeed: 'delay swift sick mixture vibrant element review arm snap true broccoli industry expect thought panel curve inhale rally dish close trade damp skin below',
+//       toAddress: 'Dawj15q13fqzh4baHqmD2kbrRCyiFfkE6gkPcUZ21KUS',
+//       lamports: 0.0013 * 10 ** 9
+//     }, {
+//     keys: [],
+//     programID: 'GW5kcMNyviBQkU8hxPBSYY2BfAhXbkAraEZsMRLE36ak',
+//     data: '8d2042bd-22b3-4dcb-b596-713d87d728f1',
+//   });
 
-//   console.log(await velasNative.getBalance('G3bCTXjguwwiMBaVknjKooVjVCZqd1ZoobN6a8GNfkMz'));
+//   // const tx = await velasNative.getTransaction('4wE4bCGTbjTg8KSTtCqvU4gWzhKjqWv97pa62sdc6vry5nEeEcFTE3VRYqZ4Po8F5JNTBxtuySqhwYWpCTQPBvdP');
+//   // console.log(tx);
+//   // console.log(velasNative.getBalance('G3bCTXjguwwiMBaVknjKooVjVCZqd1ZoobN6a8GNfkMz'));
+
+//   // console.log(await velasNative.getBalance('G3bCTXjguwwiMBaVknjKooVjVCZqd1ZoobN6a8GNfkMz'));
 // })();
+
+
+// indicate swift danger law anchor snack guilt endless harbor stock involve toy

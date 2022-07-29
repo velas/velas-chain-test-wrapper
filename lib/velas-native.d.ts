@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import { Account, AccountMeta, ConfirmedBlock, Connection, PublicKey, StakeActivationData } from '@velas/solana-web3';
+import { Account, AccountMeta, ConfirmedBlock, Connection, PublicKey, StakeActivationData } from '@velas/web3';
 import nacl from 'tweetnacl';
 declare class AccountObj {
     seed: string;
@@ -13,9 +13,12 @@ declare class AccountObj {
     constructor(seed: string);
 }
 export declare class VelasNative {
+    rpcURL: string;
     connection: Connection | undefined;
+    constructor(rpcURL?: string);
     private establishConnection;
     createAccount(): AccountObj;
+    test(): Promise<void>;
     getBalance(account: string | PublicKey): Promise<{
         lamports: number;
         VLX: number;
@@ -23,16 +26,16 @@ export declare class VelasNative {
     getStakeAccount(address: string): Promise<StakeActivationData>;
     getKeysFromSeed(seedPhrase: string): Promise<void>;
     getConfirmedBlock(slot: number): Promise<ConfirmedBlock>;
-    getNonce(nonceAccount: string | PublicKey): Promise<import("@velas/solana-web3").NonceAccount | null>;
-    getAccountInfo(publicKey: PublicKey): Promise<import("@velas/solana-web3").AccountInfo<Buffer> | null>;
-    getEpochInfo(): Promise<import("@velas/solana-web3").EpochInfo>;
+    getNonce(nonceAccount: string | PublicKey): Promise<import("@velas/web3").NonceAccount | null>;
+    getAccountInfo(publicKey: PublicKey): Promise<import("@velas/web3").AccountInfo<Buffer> | null>;
+    getEpochInfo(): Promise<import("@velas/web3").EpochInfo>;
     getSlot(): Promise<number>;
     getSupply(): Promise<void>;
-    getTransaction(signature: string): Promise<import("@velas/solana-web3").ConfirmedTransaction | null>;
+    getTransaction(signature: string): Promise<import("@velas/web3").ConfirmedTransaction | null>;
     /***
      * waitTime in seconds
      */
-    waitForConfirmedTransaction(signature: string, waitTime?: number): Promise<import("@velas/solana-web3").ConfirmedTransaction>;
+    waitForConfirmedTransaction(signature: string, waitTime?: number): Promise<import("@velas/web3").ConfirmedTransaction>;
     transfer(params: {
         payerSeed: string;
         toAddress: string;
