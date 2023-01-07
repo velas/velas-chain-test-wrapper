@@ -36,6 +36,11 @@ export declare class VelasNative {
      * waitTime in seconds
      */
     waitForConfirmedTransaction(signature: string, waitTime?: number): Promise<import("@velas/web3").ConfirmedTransaction>;
+    getTransactionConfirmationStatus(signature: string): Promise<import("@velas/web3").TransactionConfirmationStatus | undefined>;
+    /***
+     * waitTime in seconds
+     */
+    waitForFinalizedTransaction(signature: string, waitTime?: number): Promise<void>;
     transfer(params: {
         payerSeed: string;
         toAddress: string;
@@ -45,7 +50,7 @@ export declare class VelasNative {
         programID: string;
         data: string;
     }): Promise<string>;
-    replenish(toAddress: string, lamports: number): Promise<void>;
+    replenish(toAddress: string, lamports: number, waitForFinalized?: boolean): Promise<void>;
 }
 export declare const velasNative: VelasNative;
 export {};
