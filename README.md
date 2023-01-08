@@ -1,6 +1,6 @@
 ## This repo is a wrapper for velas chain testing
 
-### Currenyly exported modules:
+### Currently exported modules:
 - velasNative
 
 ### Modules in progress:

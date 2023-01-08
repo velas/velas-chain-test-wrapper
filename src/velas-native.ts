@@ -146,6 +146,12 @@ export class VelasNative {
   //   return await this.connection.getStakeActivation(stakeAccountPubKey);
   // }
 
+  // TODO
+  // private async closeConnection(): Promise<Connection> {
+  //   if (!this.connection) throw new Error(`Cannot establish connection to web3`);
+    
+  //   return this.connection;
+  // }
 
 
   // async getNextSeed() {
@@ -318,10 +324,38 @@ export class VelasNative {
     return transaction;
   }
 
+  async getTransactionConfirmationStatus(signature: string) {
+    const connection = await this.establishConnection();
+    const transaction = await connection.getSignatureStatus(signature);
+    if (!transaction) {
+      throw new Error(`Transaction ${signature} doesn\'t exist`);
+    }
+    return await transaction.value?.confirmationStatus;
+  }
+
+  /***
+   * waitTime in seconds
+   */
+  async waitForFinalizedTransaction(signature: string, waitAfterConfirmed = 30) {
+    await this.waitForConfirmedTransaction(signature);
+
+    let status = await this.getTransactionConfirmationStatus(signature);
+    let transactionFinalizationTime = 0;
+    while (status !== 'finalized' && transactionFinalizationTime <= waitAfterConfirmed) {
+      transactionFinalizationTime++;
+      await helpers.sleep(1000);
+      status = await this.getTransactionConfirmationStatus(signature);
+    }
+    if (status !== 'finalized'){
+      throw new Error(`Transaction ${signature} was not finalized`);
+    }
+    log.info(`Transaction ${signature} was finalized`);
+  }
+
   async transfer(params: {
     payerSeed: string,
     toAddress: string,
-    lamports: number
+    lamports: number,
   }, instructionData?: {
     keys: AccountMeta[],
     programID: string,
@@ -366,7 +400,7 @@ export class VelasNative {
     return transactionId;
   }
 
-  async replenish(toAddress: string, lamports: number): Promise<void> {
+  async replenish(toAddress: string, lamports: number, waitForFinalized?: boolean): Promise<void> {
     if (lamports > 100 * 10 ** 9) throw new Error(`You try to replenish wallet with too much funds. Please use <100 VLX`);
 
     await this.establishConnection();
@@ -376,7 +410,11 @@ export class VelasNative {
       lamports,
       toAddress,
     });
-    await this.waitForConfirmedTransaction(tx);
+    if (waitForFinalized){
+      await this.waitForFinalizedTransaction(tx);
+    } else {
+      await this.waitForConfirmedTransaction(tx);
+    }
   }
 }
 
