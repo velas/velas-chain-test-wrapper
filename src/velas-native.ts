@@ -146,6 +146,12 @@ export class VelasNative {
   //   return await this.connection.getStakeActivation(stakeAccountPubKey);
   // }
 
+  // TODO
+  // private async closeConnection(): Promise<Connection> {
+  //   if (!this.connection) throw new Error(`Cannot establish connection to web3`);
+    
+  //   return this.connection;
+  // }
 
 
   // async getNextSeed() {
