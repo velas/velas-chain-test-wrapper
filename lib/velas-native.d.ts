@@ -40,7 +40,7 @@ export declare class VelasNative {
     /***
      * waitTime in seconds
      */
-    waitForFinalizedTransaction(signature: string, waitTime?: number): Promise<void>;
+    waitForFinalizedTransaction(signature: string, waitAfterConfirmed?: number): Promise<void>;
     transfer(params: {
         payerSeed: string;
         toAddress: string;

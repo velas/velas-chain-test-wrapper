@@ -320,7 +320,7 @@ export class VelasNative {
 
   async getTransactionConfirmationStatus(signature: string) {
     const connection = await this.establishConnection();
-    let transaction = await connection.getSignatureStatus(signature);
+    const transaction = await connection.getSignatureStatus(signature);
     if (!transaction) {
       throw new Error(`Transaction ${signature} doesn\'t exist`);
     }
@@ -330,12 +330,12 @@ export class VelasNative {
   /***
    * waitTime in seconds
    */
-  async waitForFinalizedTransaction(signature: string, waitTime = 30) {
+  async waitForFinalizedTransaction(signature: string, waitAfterConfirmed = 30) {
     await this.waitForConfirmedTransaction(signature);
 
     let status = await this.getTransactionConfirmationStatus(signature);
     let transactionFinalizationTime = 0;
-    while (status !== 'finalized' && transactionFinalizationTime <= waitTime) {
+    while (status !== 'finalized' && transactionFinalizationTime <= waitAfterConfirmed) {
       transactionFinalizationTime++;
       await helpers.sleep(1000);
       status = await this.getTransactionConfirmationStatus(signature);
@@ -343,7 +343,7 @@ export class VelasNative {
     if (status !== 'finalized'){
       throw new Error(`Transaction ${signature} was not finalized`);
     }
-    log.info(`Transaction ${signature} successfully finalized`);
+    log.info(`Transaction ${signature} was finalized`);
   }
 
   async transfer(params: {
@@ -404,9 +404,10 @@ export class VelasNative {
       lamports,
       toAddress,
     });
-    await this.waitForConfirmedTransaction(tx);
     if (waitForFinalized){
       await this.waitForFinalizedTransaction(tx);
+    } else {
+      await this.waitForConfirmedTransaction(tx);
     }
   }
 }
