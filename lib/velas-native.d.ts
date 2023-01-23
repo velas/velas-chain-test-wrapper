@@ -50,6 +50,11 @@ export declare class VelasNative {
         programID: string;
         data: string;
     }): Promise<string>;
+    transferEVM(payerPrivateKey: string, to: string, value: number, params?: {
+        units?: 'wei' | 'ether';
+        approveLargeAmountTransfer?: boolean;
+        payerAddress?: string;
+    }): Promise<void>;
     replenish(toAddress: string, lamports: number, waitForFinalized?: boolean): Promise<void>;
 }
 export declare const velasNative: VelasNative;

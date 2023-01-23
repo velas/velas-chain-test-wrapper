@@ -1,6 +1,6 @@
 {
   "name": "@velas/velas-chain-test-wrapper",
-  "version": "1.4.2",
+  "version": "1.5.1",
   "description": "Wrapper for velas chain testing",
   "typings": "lib/index.d.ts",
   "files": [
@@ -39,7 +39,8 @@
     "tracer": "^1.1.4",
     "ts-mocha": "^8.0.0",
     "ts-node": "^10.0.0",
-    "tweetnacl": "^1.0.3"
+    "tweetnacl": "^1.0.3",
+    "web3": "^1.8.1"
   },
   "directories": {
     "lib": "lib"

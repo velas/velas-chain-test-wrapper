@@ -1,14 +1,13 @@
 import {
-  Account, AccountMeta, Authorized, ConfirmedBlock, Connection, PublicKey,
+  Account, AccountMeta, ConfirmedBlock, Connection, PublicKey,
   sendAndConfirmRawTransaction,
-  StakeActivationData,
-  StakeProgram,
-  SystemProgram, Transaction, TransactionInstruction
+  StakeActivationData, SystemProgram, Transaction, TransactionInstruction
 } from '@velas/web3';
 import * as bip39 from 'bip39';
 import bs58 from 'bs58';
 import * as ed25519 from 'ed25519-hd-key';
 import nacl from 'tweetnacl';
+import Web3 from 'web3';
 import { helpers } from './helpers';
 import { log } from './logger';
 
@@ -149,7 +148,6 @@ export class VelasNative {
   // TODO
   // private async closeConnection(): Promise<Connection> {
   //   if (!this.connection) throw new Error(`Cannot establish connection to web3`);
-    
   //   return this.connection;
   // }
 
@@ -346,7 +344,7 @@ export class VelasNative {
       await helpers.sleep(1000);
       status = await this.getTransactionConfirmationStatus(signature);
     }
-    if (status !== 'finalized'){
+    if (status !== 'finalized') {
       throw new Error(`Transaction ${signature} was not finalized`);
     }
     log.info(`Transaction ${signature} was finalized`);
@@ -400,6 +398,55 @@ export class VelasNative {
     return transactionId;
   }
 
+
+  async transferEVM(
+    payerPrivateKey: string,
+    to: string,
+    value: number,
+    params?: {
+      units?: 'wei' | 'ether',
+      approveLargeAmountTransfer?: boolean
+      payerAddress?: string,
+    }
+  ) {
+    if (params?.units === 'ether') value = value * 10 ** 18;
+
+    // reserve endpoint https://testnet.velas.com/rpc
+    const web3 = new Web3(new Web3.providers.HttpProvider(this.rpcURL));
+
+    const MAX_AMOUNT_TO_BE_SENT = 1 * 10 ** 18;
+    if (value > MAX_AMOUNT_TO_BE_SENT && !params?.approveLargeAmountTransfer) {
+      throw new Error(`You try to send ${MAX_AMOUNT_TO_BE_SENT / 10 ** 18} VLX EVM tokens.
+      Such big amount spendings are prevented. Please pass "approveLargeAmountTransfer" param with "true" value.`)
+    }
+
+    const transaction: {
+      gas: number,
+      nonce?: number,
+      to: string,
+      value: number,
+    } = {
+      to,
+      value,
+      gas: 30000,
+    };
+
+    if (params?.payerAddress) {
+      const nonce = await web3.eth.getTransactionCount(params?.payerAddress, 'latest');
+      transaction.nonce = nonce;
+      log.debug('nonce:', nonce);
+    }
+
+    const signedTx = await web3.eth.accounts.signTransaction(transaction, payerPrivateKey);
+
+    await web3.eth.sendSignedTransaction(signedTx.rawTransaction!, function (error, hash) {
+      if (error) {
+        throw new Error(`Send EVM tx failed: ${error}`);
+      }
+      log.info(`Successfully sent ${value / 10 ** 18} VLX EVM tokens to ${to}. Tx hash: ${hash}`);
+    });
+  }
+
   async replenish(toAddress: string, lamports: number, waitForFinalized?: boolean): Promise<void> {
     if (lamports > 100 * 10 ** 9) throw new Error(`You try to replenish wallet with too much funds. Please use <100 VLX`);
 
@@ -410,7 +457,7 @@ export class VelasNative {
       lamports,
       toAddress,
     });
-    if (waitForFinalized){
+    if (waitForFinalized) {
       await this.waitForFinalizedTransaction(tx);
     } else {
       await this.waitForConfirmedTransaction(tx);
@@ -484,23 +531,23 @@ export const velasNative = new VelasNative();
 })();
 
 // (async () => {
-//   const velasNative = new VelasNative();
-//   const hash = await velasNative.transfer(
-//     {
-//       payerSeed: 'delay swift sick mixture vibrant element review arm snap true broccoli industry expect thought panel curve inhale rally dish close trade damp skin below',
-//       toAddress: 'Dawj15q13fqzh4baHqmD2kbrRCyiFfkE6gkPcUZ21KUS',
-//       lamports: 0.0013 * 10 ** 9
-//     }, {
-//     keys: [],
-//     programID: 'GW5kcMNyviBQkU8hxPBSYY2BfAhXbkAraEZsMRLE36ak',
-//     data: '8d2042bd-22b3-4dcb-b596-713d87d728f1',
-//   });
+  // const velasNative = new VelasNative();
+  // const hash = await velasNative.transfer(
+  //   {
+      // payerSeed: 'delay swift sick mixture vibrant element review arm snap true broccoli industry expect thought panel curve inhale rally dish close trade damp skin below',
+  //     toAddress: 'Dawj15q13fqzh4baHqmD2kbrRCyiFfkE6gkPcUZ21KUS',
+  //     lamports: 0.0013 * 10 ** 9
+  //   }, {
+  //   keys: [],
+  //   programID: 'GW5kcMNyviBQkU8hxPBSYY2BfAhXbkAraEZsMRLE36ak',
+  //   data: '8d2042bd-22b3-4dcb-b596-713d87d728f1',
+  // });
 
-//   // const tx = await velasNative.getTransaction('4wE4bCGTbjTg8KSTtCqvU4gWzhKjqWv97pa62sdc6vry5nEeEcFTE3VRYqZ4Po8F5JNTBxtuySqhwYWpCTQPBvdP');
-//   // console.log(tx);
-//   // console.log(velasNative.getBalance('G3bCTXjguwwiMBaVknjKooVjVCZqd1ZoobN6a8GNfkMz'));
+  // const tx = await velasNative.getTransaction('4wE4bCGTbjTg8KSTtCqvU4gWzhKjqWv97pa62sdc6vry5nEeEcFTE3VRYqZ4Po8F5JNTBxtuySqhwYWpCTQPBvdP');
+  // console.log(tx);
+  // console.log(velasNative.getBalance('G3bCTXjguwwiMBaVknjKooVjVCZqd1ZoobN6a8GNfkMz'));
 
-//   // console.log(await velasNative.getBalance('G3bCTXjguwwiMBaVknjKooVjVCZqd1ZoobN6a8GNfkMz'));
+  // console.log(await velasNative.getBalance('G3bCTXjguwwiMBaVknjKooVjVCZqd1ZoobN6a8GNfkMz'));
 // })();
 
 
