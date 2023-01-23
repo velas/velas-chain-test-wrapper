@@ -59,10 +59,11 @@ export declare class VelasNative {
      * if you plan to sent several transactions in a row, please pass this param,
      * in other case some transactions may be failed;
      */
-    transferEVM(payerPrivateKey: string, to: string, value: number, params?: {
+    transferEVM(to: string, value: number, params?: {
         units?: 'wei' | 'ether';
         approveLargeAmountTransfer?: boolean;
         payerAddress?: string;
+        payerPrivateKey?: string;
     }): Promise<void>;
     replenish(toAddress: string, lamports: number, waitForFinalized?: boolean): Promise<void>;
 }

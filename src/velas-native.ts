@@ -408,16 +408,19 @@ export class VelasNative {
  * in other case some transactions may be failed;
  */
   async transferEVM(
-    payerPrivateKey: string,
     to: string,
     value: number,
     params?: {
       units?: 'wei' | 'ether',
       approveLargeAmountTransfer?: boolean
       payerAddress?: string,
+      payerPrivateKey?: string,
     }
   ) {
     if (params?.units === 'ether') value = value * 10 ** 18;
+
+    const payerPrivateKey = params?.payerPrivateKey || process.env.VLX_EVM_PRIVATE_KEY;
+    if (!payerPrivateKey) throw new Error(`No payer key. Pass as param or env variable`);
 
     // reserve endpoint https://testnet.velas.com/rpc
     const web3 = new Web3(new Web3.providers.HttpProvider(this.rpcURL));

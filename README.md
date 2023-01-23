@@ -43,3 +43,10 @@ npm publish --access public
 `velas-keygen pubkey <path_to_file>`
 
 If you get the wallet address without any errors and this address corresponds to the address from wallet app – all is fine.
+
+
+# ENV variables
+# address by this seed should contain VLX Native tokens
+VLX_Native_SEED=
+# address by this private key should contain VLX EVM tokens
+VLX_EVM_PRIVATE_KEY=
