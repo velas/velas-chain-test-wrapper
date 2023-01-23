@@ -64,7 +64,21 @@ export declare class VelasNative {
         approveLargeAmountTransfer?: boolean;
         payerAddress?: string;
         payerPrivateKey?: string;
-    }): Promise<void>;
+    }): Promise<string>;
+    /**
+     *
+     * @param payerPrivateKey
+     * @param to
+     * @param value
+     * @param params payerAddress is optional but required to calculate nonce;
+     * if you plan to sent several transactions in a row, please pass this param,
+     * in other case some transactions may be failed;
+     */
+    transferEVMToken(to: string, value: number, tokenAddress: string, params?: {
+        units?: 'wei' | 'ether';
+        payerAddress?: string;
+        payerPrivateKey?: string;
+    }): Promise<string>;
     replenish(toAddress: string, lamports: number, waitForFinalized?: boolean): Promise<void>;
 }
 export declare const velasNative: VelasNative;
