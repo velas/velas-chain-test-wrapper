@@ -10,6 +10,8 @@ import nacl from 'tweetnacl';
 import Web3 from 'web3';
 import { helpers } from './helpers';
 import { log } from './logger';
+import { AbiItem } from 'web3-utils';
+import defaultABI from './contracts/default-ERC-20-abi.json'
 
 class AccountObj {
   account;
@@ -398,15 +400,15 @@ export class VelasNative {
     return transactionId;
   }
 
-/**
- * 
- * @param payerPrivateKey 
- * @param to 
- * @param value 
- * @param params payerAddress is optional but required to calculate nonce;
- * if you plan to sent several transactions in a row, please pass this param,
- * in other case some transactions may be failed;
- */
+  /**
+   * 
+   * @param payerPrivateKey 
+   * @param to 
+   * @param value 
+   * @param params payerAddress is optional but required to calculate nonce;
+   * if you plan to sent several transactions in a row, please pass this param,
+   * in other case some transactions may be failed;
+   */
   async transferEVM(
     to: string,
     value: number,
@@ -416,7 +418,7 @@ export class VelasNative {
       payerAddress?: string,
       payerPrivateKey?: string,
     }
-  ) {
+  ): Promise<string> {
     if (params?.units === 'ether') value = value * 10 ** 18;
 
     const payerPrivateKey = params?.payerPrivateKey || process.env.VLX_EVM_PRIVATE_KEY;
@@ -450,12 +452,77 @@ export class VelasNative {
 
     const signedTx = await web3.eth.accounts.signTransaction(transaction, payerPrivateKey);
 
+    let txHash = '';
     await web3.eth.sendSignedTransaction(signedTx.rawTransaction!, function (error, hash) {
       if (error) {
         throw new Error(`Send EVM tx failed: ${error}`);
       }
       log.info(`Successfully sent ${value / 10 ** 18} VLX EVM tokens to ${to}. Tx hash: ${hash}`);
+      txHash = hash;
     });
+
+    return txHash;
+  }
+
+  /**
+   * 
+   * @param payerPrivateKey 
+   * @param to 
+   * @param value 
+   * @param params payerAddress is optional but required to calculate nonce;
+   * if you plan to sent several transactions in a row, please pass this param,
+   * in other case some transactions may be failed;
+   */
+  async transferEVMToken(
+    to: string,
+    value: number,
+    tokenAddress: string,
+    params?: {
+      units?: 'wei' | 'ether',
+      payerAddress?: string,
+      payerPrivateKey?: string,
+    }
+  ): Promise<string> {
+    if (params?.units === 'ether') value = value * 10 ** 18;
+
+    const payerPrivateKey = params?.payerPrivateKey || process.env.VLX_EVM_PRIVATE_KEY;
+    if (!payerPrivateKey) throw new Error(`No payer key. Pass as param or env variable`);
+
+    const web3 = new Web3(new Web3.providers.HttpProvider(this.rpcURL));
+
+    let contract = new web3.eth.Contract(defaultABI as AbiItem[], tokenAddress,);
+    let data = contract.methods.transfer(to, value).encodeABI()
+
+    const transaction: {
+      gas: number,
+      nonce?: number,
+      to: string,
+      data: string,
+    } = {
+      to: tokenAddress,
+      gas: 100000,
+      data,
+    };
+
+    if (params?.payerAddress) {
+      const nonce = await web3.eth.getTransactionCount(params?.payerAddress, 'latest');
+      transaction.nonce = nonce;
+      log.debug('nonce:', nonce);
+    }
+
+    const signedTx = await web3.eth.accounts.signTransaction(transaction, payerPrivateKey);
+
+    let txHash = '';
+    await web3.eth.sendSignedTransaction(signedTx.rawTransaction!, function (error, hash) {
+      if (error) {
+        throw new Error(`Send EVM tx failed: ${error}`);
+      }
+      log.info(`Successfully sent ${value / 10 ** 18} tokens to ${to}. Tx hash: ${hash}`);
+
+      txHash = hash;
+    });
+
+    return txHash;
   }
 
   async replenish(toAddress: string, lamports: number, waitForFinalized?: boolean): Promise<void> {
@@ -545,7 +612,7 @@ export const velasNative = new VelasNative();
   // const velasNative = new VelasNative();
   // const hash = await velasNative.transfer(
   //   {
-      // payerSeed: 'delay swift sick mixture vibrant element review arm snap true broccoli industry expect thought panel curve inhale rally dish close trade damp skin below',
+  // payerSeed: 'delay swift sick mixture vibrant element review arm snap true broccoli industry expect thought panel curve inhale rally dish close trade damp skin below',
   //     toAddress: 'Dawj15q13fqzh4baHqmD2kbrRCyiFfkE6gkPcUZ21KUS',
   //     lamports: 0.0013 * 10 ** 9
   //   }, {
