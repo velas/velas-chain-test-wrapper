@@ -398,7 +398,15 @@ export class VelasNative {
     return transactionId;
   }
 
-
+/**
+ * 
+ * @param payerPrivateKey 
+ * @param to 
+ * @param value 
+ * @param params payerAddress is optional but required to calculate nonce;
+ * if you plan to sent several transactions in a row, please pass this param,
+ * in other case some transactions may be failed;
+ */
   async transferEVM(
     payerPrivateKey: string,
     to: string,

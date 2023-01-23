@@ -50,6 +50,15 @@ export declare class VelasNative {
         programID: string;
         data: string;
     }): Promise<string>;
+    /**
+     *
+     * @param payerPrivateKey
+     * @param to
+     * @param value
+     * @param params payerAddress is optional but required to calculate nonce;
+     * if you plan to sent several transactions in a row, please pass this param,
+     * in other case some transactions may be failed;
+     */
     transferEVM(payerPrivateKey: string, to: string, value: number, params?: {
         units?: 'wei' | 'ether';
         approveLargeAmountTransfer?: boolean;
